@@ -108,10 +108,23 @@ class tetrisPiece {
         this.rotation = r
         this.posX = 5
         this.posY = 0
+
     }
     
 }
 
+let shapes: number [][][] = [
+    [[1, 5, 9, 13], [0, 1, 2, 3]],
+    [[1, 5, 6, 10], [2, 3, 5, 6]],
+    [[2, 5, 6, 9], [1, 2, 6, 7]],
+    [[1, 4, 5, 6], [1, 5, 6, 9], [1, 2, 3, 5], [1, 4, 5, 9]],
+    [[1, 2, 5, 6 ]],
+    [[1, 5, 9, 10], [1, 2, 3, 5], [1, 2, 6, 10], [1, 5, 6, 7]],
+    [[1, 5, 6, 7], [1, 5, 8, 9], [1, 2, 5, 9], [1, 2, 3, 7]]
+]
+
 scene.setBackgroundImage(assets.image`game`)
 
 const tetris = new tetrisGrid()
+
+const piece = new tetrisPiece(1, 0, 1)
