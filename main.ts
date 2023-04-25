@@ -1,8 +1,6 @@
 class tetrisGrid {
-    
     grid: number[][]
     next: number[][]
-
     score: number
     lines: number
 
@@ -42,6 +40,9 @@ class tetrisGrid {
             this.nextGrid.push(s_row)
         }
 
+        this.score = 0
+        this.lines = 0
+
         this.scoreSprite = textsprite.create("0")
         this.scoreSprite.setMaxFontHeight(10)
         this.scoreSprite.setPosition(137, 72)
@@ -51,24 +52,42 @@ class tetrisGrid {
         this.linesSprite.setPosition(137, 105)
     }
 
-    update () {
+    updatePiece (p: tetrisPiece) {
 
-        let images = [
-            assets.image`color7`,
-            assets.image`color0`,
-            assets.image`color1`,
-            assets.image`color2`,
-            assets.image`color3`,
-            assets.image`color4`,
-            assets.image`color5`,
-            assets.image`color6`,
-        ]
+        for (let i = 0; i < 4; i++) {
+            let x = p.posX + shapes[p.shape][p.rotation][i] % 4
+            let y = p.posY + Math.floor(shapes[p.shape][p.rotation][i] / 4)
+            this.spritesGrid[y][x].setImage(typeImages[p.shape])
+        }
+    
+    }
+
+    movePiece (p: tetrisPiece, d: number) {
+        switch (d) {
+            case 9:
+                p.posX--
+                break
+
+            case 3:
+                p.posX++
+                break
+
+            case 6:
+                p.posY++
+                break
+        }
+
+        this.updatePiece(p)
+
+    }
+
+    update () {
 
         for (let i = 0; i < 20; i++) {
             let row: Sprite[] = []
             for (let j = 0; j < 10; j++) {
                 let index = this.grid[i][j]
-                this.spritesGrid[i][j].setImage(images[index])
+                this.spritesGrid[i][j].setImage(typeImages[index])
             }
             
         }
@@ -103,14 +122,13 @@ class tetrisPiece {
     posX: number
     posY: number
 
-    constructor (s: number, r: number, speed: number) {
+    constructor (g: tetrisGrid, s: number, r: number) {
         this.shape = s
         this.rotation = r
-        this.posX = 5
+        this.posX = 3
         this.posY = 0
-
     }
-    
+
 }
 
 let shapes: number [][][] = [
@@ -123,8 +141,24 @@ let shapes: number [][][] = [
     [[1, 5, 6, 7], [1, 5, 8, 9], [1, 2, 5, 9], [1, 2, 3, 7]]
 ]
 
+let typeImages = [
+    assets.image`color7`,
+    assets.image`color0`,
+    assets.image`color1`,
+    assets.image`color2`,
+    assets.image`color3`,
+    assets.image`color4`,
+    assets.image`color5`,
+    assets.image`color6`,
+]
+
+// game.splash("TETRIS", "Press A when ready")
+
 scene.setBackgroundImage(assets.image`game`)
 
 const tetris = new tetrisGrid()
 
-const piece = new tetrisPiece(1, 0, 1)
+const piece = new tetrisPiece(tetris, 1, 0)
+
+tetris.updatePiece(piece)
+
