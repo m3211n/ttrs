@@ -1,17 +1,20 @@
 class tetrisGrid {
     grid: number[][]
-    next: number[][]
+    nextQueue: number[]
     level: number
-    lines: number
-    spritesGrid: Sprite[][]
+    score: number
+    gridSprites: Sprite[][]
+    gravity: number
 
-    private nextGrid: Sprite[][]
+    private nextSprites: Sprite[][]
     private levelSprite: TextSprite
-    private linesSprite: TextSprite
+    private scoreSprite: TextSprite
 
     constructor () {
         this.grid = []
-        this.spritesGrid = []
+        this.gridSprites = []
+        this.nextQueue = []
+        
         for (let i = 0; i < 20; i++) {
             let row: number[] = []
             let s_row: Sprite[] = []
@@ -22,34 +25,33 @@ class tetrisGrid {
                 s_row.push(cell)
             }
             this.grid.push(row)
-            this.spritesGrid.push(s_row)
+            this.gridSprites.push(s_row)
         }
 
-        this.next = []
-        this.nextGrid = []
+        this.nextQueue.push(Math.randomRange(1, 7))
+
+        this.nextSprites = []
         for (let i = 0; i < 4; i++) {
-            let row: number[] = []
             let s_row: Sprite[] = []
             for (let j = 0; j < 4; j++) {
-                row.push(0)
                 let cell = sprites.create(assets.image`color7`, SpriteKind.Player)
                 cell.setPosition(j * 6 + 127, i * 6 + 25)
                 s_row.push(cell)
             }
-            this.next.push(row)
-            this.nextGrid.push(s_row)
+            this.nextSprites.push(s_row)
         }
 
         this.level = 1
-        this.lines = 0
+        this.score = 0
+        this.gravity = 1
 
         this.levelSprite = textsprite.create(this.level.toString())
         this.levelSprite.setMaxFontHeight(8)
         this.levelSprite.setPosition(136, 72)
 
-        this.linesSprite = textsprite.create(this.lines.toString())
-        this.linesSprite.setMaxFontHeight(8)
-        this.linesSprite.setPosition(136, 105)
+        this.scoreSprite = textsprite.create(this.score.toString())
+        this.scoreSprite.setMaxFontHeight(8)
+        this.scoreSprite.setPosition(136, 105)
     }
 
     updateGrid () {
@@ -58,17 +60,31 @@ class tetrisGrid {
             let row: Sprite[] = []
             for (let j = 0; j < 10; j++) {
                 let index = this.grid[i][j]
-                this.spritesGrid[i][j].setImage(typeImages[index])
+                this.gridSprites[i][j].setImage(typeImages[index])
             }
         }
 
+        for (let i = 0; i < 4; i++) {
+            for (let s of this.nextSprites[i]) {
+                s.setImage(assets.image`color7`)
+            }
+        }
+
+        for (let i = 0; i < 4; i++) {
+            let x = tShape(this.nextQueue[0])[i] % 4
+            let y = Math.floor(tShape(this.nextQueue[0])[i] / 4)
+            this.nextSprites[y][x].setImage(typeImages[this.nextQueue[0]])
+        }
+
         this.levelSprite.setText(this.level.toString())
-        this.linesSprite.setText(this.lines.toString())
+        this.levelSprite.setPosition(136, 72)
+
+        this.scoreSprite.setText(this.score.toString())
+        this.scoreSprite.setPosition(136, 105)
     }
 
     scanRows () {
-
-        let result: boolean = false
+        let lines = 0
         for (let i = 0; i < 20; i++) {
             let row: number[] = []
             for (let j = 0; j < 10; j++) {
@@ -77,21 +93,52 @@ class tetrisGrid {
             if (this.grid[i].indexOf(0) == -1) {
                 this.grid.removeAt(i)
                 this.grid.unshift(row)
-                result = true
+                lines++
             }
         }
-        return result
+        switch(lines) {
+            case 1:
+                this.score += 1
+                break
+            case 2:
+                this.score += 3
+                break
+            case 3:
+                this.score += 5
+                break
+            case 4:
+                this.score += 8
+                break
+        }
+
+        while (this.score > this.level * 5) {
+            this.level ++
+        }
+
+        this.gravity = Math.pow((0.8 - ((this.level - 1)*0.007)), this.level - 1) 
+        this.updateGrid()
     }
 
     drawPiece (p: tetrisPiece) {
         this.updateGrid()
         for (let i = 0; i < 4; i++) {
-            let x = p.posX + shapes[p.shape][p.rotation][i] % 4
-            let y = p.posY + Math.floor(shapes[p.shape][p.rotation][i] / 4)
-            this.spritesGrid[y][x].setImage(typeImages[p.shape])
+            let x = p.posX + tShape(p.shape, p.rotation)[i] % 4
+            let y = p.posY + Math.floor(tShape(p.shape, p.rotation)[i] / 4)
+            this.gridSprites[y][x].setImage(typeImages[p.shape])
         }
     }
 
+    nextShape () : number {
+        let rndFound = false
+        while (!rndFound) {
+            let rnd = Math.randomRange(1, 7)
+            if (rnd != this.nextQueue[this.nextQueue.length - 1]) {
+                this.nextQueue.push(rnd)
+                rndFound = true
+            }
+        }
+        return this.nextQueue.shift()
+    }
 }
 
 class tetrisPiece {
@@ -111,61 +158,82 @@ class tetrisPiece {
         this.posY = 0
     }
 
+    numRotations(): number {
+        return tShape(this.shape).length
+    }
+
+    shapeMatrix (id?:number) : number[] {
+        if (!id) {
+            return tShape(this.shape, this.rotation)
+        } else {
+            return tShape(id)
+        }
+    }
+
+    shapeMatrixAt (i: number) : number {
+        let m = tShape(this.shape, this.rotation)
+        return m[i]
+    }
+
+    relX (i: number) : number {
+        return this.posX + this.shapeMatrixAt(i) % 4
+    }
+
+    relY (i: number) : number {
+        return this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+    }
+
     rotate (cw: boolean) {
         let r = this.rotation
-        if (cw) {
-            r++
-            if (((this.shape == 1 || this.shape == 2 || this.shape == 3) && r > 1) || ((this.shape == 4 || this.shape == 6 || this.shape == 7) && r > 3) || (this.shape == 5)) {
-                r = 0
-            }
-        } else {
-            r--
-            if (r < 0) {
-                if (this.shape == 1 || this.shape == 2 || this.shape == 3) {
-                    r = 1
-                } else if (this.shape == 4 || this.shape == 6 || this.shape == 7) {
-                    r = 3
-                } else {
-                    r = 0
-                }
-            }
-        }
+        // circulate rotation
+
+        r = ( cw ? r + 1 : r - 1)
+        r = ( r > this.numRotations() - 1 ? 0 : (r < 0 ? this.numRotations() - 1 : r ))
+
         this.rotation = r
         for (let i = 0; i < 4; i++) {
-            if (this.posX + shapes[this.shape][this.rotation][i] % 4 > 9) {
-                this.posX = 9 - shapes[this.shape][this.rotation][i] % 4
-            } else if (this.posX + shapes[this.shape][this.rotation][i] % 4 < 0) {
-                this.posX = -shapes[this.shape][this.rotation][i] % 4
+            if ( this.relX(i) > 9) {
+                this.posX = 9 - this.shapeMatrixAt(i) % 4
+            } else if (this.relX(i) < 0) {
+                this.posX = - this.shapeMatrixAt(i) % 4
             }
         }
     }
 
     moveRight () {
-        this.posX++ 
+        let f = true
         for (let i = 0; i < 4; i++) {
-            if (this.posX + shapes[this.shape][this.rotation][i] % 4 > 9) {
-                this.posX = 9 - shapes[this.shape][this.rotation][i] % 4
+            let x = this.posX + this.shapeMatrixAt(i) % 4
+            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            if ((x < 9 && tetris.grid[y][x + 1] != 0) || x == 9 ) {
+                f = false
             }
+        }
+        if (f) {
+            this.posX++
         }
     }
 
     moveLeft () {
-        this.posX--
+        let f = true
         for (let i = 0; i < 4; i++) {
-            if (this.posX + shapes[this.shape][this.rotation][i] % 4 < 0) {
-                this.posX = -shapes[this.shape][this.rotation][i] % 4
+            let x = this.posX + this.shapeMatrixAt(i) % 4
+            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            if ((x > 0 && tetris.grid[y][x - 1] != 0) || x == 0) {
+                f = false
             }
+        }
+        if (f) {
+            this.posX--
         }
     }
 
     moveDown () {
         // check if there's room below
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + shapes[this.shape][this.rotation][i] % 4
-            let y = this.posY + Math.floor(shapes[this.shape][this.rotation][i] / 4)
-            if ( y > 18 ) {
-                this.freeze()
-            } else if ( tetris.grid[y + 1][x] != 0 ) {
+            let x = this.posX + this.shapeMatrixAt(i) % 4
+            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            if ((y < 19 && tetris.grid[y + 1][x] != 0) || y == 19 ) {
                 this.freeze()
             }
         }
@@ -181,13 +249,12 @@ class tetrisPiece {
     freeze() {
         this.frozen = true
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + shapes[this.shape][this.rotation][i] % 4
-            let y = this.posY + Math.floor(shapes[this.shape][this.rotation][i] / 4)
+            let x = this.posX + this.shapeMatrixAt(i) % 4
+            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
             tetris.grid[y][x] = this.shape
         }
-        this.reset(4)
-        tetris.updateGrid()
-        console.log(tetris.grid)
+        this.reset(tetris.nextShape())
+        tetris.scanRows()
     }
 
     reset (s: number) {
@@ -203,16 +270,19 @@ class tetrisPiece {
     }
 }
 
-let shapes: number [][][] = [
-    [[]],
-    [[1, 5, 9, 13], [0, 1, 2, 3]],
-    [[1, 5, 6, 10], [1, 2, 4, 5]],
-    [[2, 5, 6, 9], [1, 2, 6, 7]],
-    [[1, 4, 5, 6], [1, 5, 6, 9], [0, 1, 2, 5], [1, 4, 5, 9]],
-    [[1, 2, 5, 6 ]],
-    [[1, 5, 9, 10], [1, 2, 3, 5], [1, 2, 6, 10], [3, 5, 6, 7]],
-    [[1, 5, 6, 7], [1, 5, 8, 9], [1, 2, 5, 9], [1, 2, 3, 7]]
-]
+function tShape (s: number, r?: number) : number[] {
+    const shapes: number[][][] = [
+        [[]],
+        [[1, 5, 9, 13], [0, 1, 2, 3]],
+        [[1, 5, 6, 10], [1, 2, 4, 5]],
+        [[2, 5, 6, 9], [1, 2, 6, 7]],
+        [[1, 4, 5, 6], [1, 5, 6, 9], [0, 1, 2, 5], [1, 4, 5, 9]],
+        [[1, 2, 5, 6]],
+        [[1, 5, 9, 10], [1, 2, 3, 5], [1, 2, 6, 10], [3, 5, 6, 7]],
+        [[1, 5, 8, 9], [0, 4, 5, 6], [1, 2, 5, 9], [0, 1, 2, 6]]
+    ]
+    return shapes[s][r ? r : 0]
+}
 
 let typeImages = [
     assets.image`color7`,
@@ -225,26 +295,15 @@ let typeImages = [
     assets.image`color6`,
 ]
 
-function addRandomShape() {
-    if (shapesQueue.length > 0) {
-        let rndFound = false
-        while (!rndFound) {
-            let rnd = Math.randomRange(1, 7)
-            
-        }
-    }
-}
-
 // game.splash("TETRIS", "Press A when ready")
 
 scene.setBackgroundImage(assets.image`game`)
 
-let shapesQueue: number[] = []
-
 let tetris = new tetrisGrid()
 
-let piece = new tetrisPiece(4)
+let piece = new tetrisPiece(tetris.nextShape())
 tetris.drawPiece(piece)
+piece.moveDown()
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
     piece.rotate(false)
