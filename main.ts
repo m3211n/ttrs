@@ -103,33 +103,31 @@ class tetrisPiece {
     frozen: boolean
     velocity: number
 
-    constructor (s: number, r: number, v: number) {
+    constructor (s: number) {
         this.frozen = false
         this.shape = s
-        this.rotation = r
+        this.rotation = 0
         this.posX = 3
         this.posY = 0
-        this.velocity = v
     }
 
     rotate (cw: boolean) {
         let r = this.rotation
         if (cw) {
             r++
-            if (((this.shape == 0 || this.shape == 1 || this.shape == 2) && r > 1) || ((this.shape == 3 || this.shape == 5 || this.shape == 6) && r > 3) || (this.shape == 4)) {
+            if (((this.shape == 1 || this.shape == 2 || this.shape == 3) && r > 1) || ((this.shape == 4 || this.shape == 6 || this.shape == 7) && r > 3) || (this.shape == 5)) {
                 r = 0
             }
         } else {
             r--
             if (r < 0) {
-                if (this.shape == 0 || this.shape == 1 || this.shape == 2) {
+                if (this.shape == 1 || this.shape == 2 || this.shape == 3) {
                     r = 1
-                } else if (this.shape == 3 || this.shape == 5 || this.shape == 6) {
+                } else if (this.shape == 4 || this.shape == 6 || this.shape == 7) {
                     r = 3
                 } else {
                     r = 0
                 }
-
             }
         }
         this.rotation = r
@@ -140,7 +138,6 @@ class tetrisPiece {
                 this.posX = -shapes[this.shape][this.rotation][i] % 4
             }
         }
-
     }
 
     moveRight () {
@@ -163,18 +160,18 @@ class tetrisPiece {
 
     moveDown () {
         // check if there's room below
-        let fflag: boolean = false
         for (let i = 0; i < 4; i++) {
             let x = this.posX + shapes[this.shape][this.rotation][i] % 4
             let y = this.posY + Math.floor(shapes[this.shape][this.rotation][i] / 4)
-            console.log(this.posY + " : " + y)
-            if (tetris.grid[y + 1][x] != 0 || y > 18 ) {
-                fflag = true
+            if ( y > 18 ) {
+                this.freeze()
+            } else if ( tetris.grid[y + 1][x] != 0 ) {
+                this.freeze()
             }
         }
-        if (fflag) {
-            this.freeze()
-        } else this.posY++
+        if (!this.frozen) {
+            this.posY++
+        }
     }
 
     drop () {
@@ -188,8 +185,17 @@ class tetrisPiece {
             let y = this.posY + Math.floor(shapes[this.shape][this.rotation][i] / 4)
             tetris.grid[y][x] = this.shape
         }
+        this.reset(4)
         tetris.updateGrid()
         console.log(tetris.grid)
+    }
+
+    reset (s: number) {
+        this.posX = 4
+        this.posY = 0
+        this.rotation = 0
+        this.shape = s
+        this.frozen = false
     }
 
     hold () {
@@ -219,35 +225,34 @@ let typeImages = [
     assets.image`color6`,
 ]
 
+function addRandomShape() {
+    if (shapesQueue.length > 0) {
+        let rndFound = false
+        while (!rndFound) {
+            let rnd = Math.randomRange(1, 7)
+            
+        }
+    }
+}
+
 // game.splash("TETRIS", "Press A when ready")
 
 scene.setBackgroundImage(assets.image`game`)
 
-const tetris = new tetrisGrid()
+let shapesQueue: number[] = []
 
-const piece = new tetrisPiece(4, 0, tetris.level)
+let tetris = new tetrisGrid()
+
+let piece = new tetrisPiece(4)
 tetris.drawPiece(piece)
-
-game.onUpdate(function() { 
-    if (piece.frozen) {
-        const piece = new tetrisPiece(4, 0, tetris.level)
-        tetris.drawPiece(piece)
-    } else {
-        piece.moveDown()
-        pause (1000 / tetris.level)
-        tetris.drawPiece(piece)
-    }
-})
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
     piece.rotate(false)
-    piece.frozen = true
     tetris.drawPiece(piece)
 })
 
 controller.B.onEvent(ControllerButtonEvent.Pressed, function() {
     piece.rotate(true)
-    piece.frozen = true
     tetris.drawPiece(piece)
 })
 
