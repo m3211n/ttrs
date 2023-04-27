@@ -71,8 +71,8 @@ class tetrisGrid {
         }
 
         for (let i = 0; i < 4; i++) {
-            let x = tShape(this.nextQueue[0])[i] % 4
-            let y = Math.floor(tShape(this.nextQueue[0])[i] / 4)
+            let x = shapes[this.nextQueue[0]][0][i] % 4
+            let y = Math.floor(shapes[this.nextQueue[0]][0][i] / 4)
             this.nextSprites[y][x].setImage(typeImages[this.nextQueue[0]])
         }
 
@@ -122,9 +122,7 @@ class tetrisGrid {
     drawPiece (p: tetrisPiece) {
         this.updateGrid()
         for (let i = 0; i < 4; i++) {
-            let x = p.posX + tShape(p.shape, p.rotation)[i] % 4
-            let y = p.posY + Math.floor(tShape(p.shape, p.rotation)[i] / 4)
-            this.gridSprites[y][x].setImage(typeImages[p.shape])
+            this.gridSprites[p.relY(i)][p.relX(i)].setImage(typeImages[p.shape])
         }
     }
 
@@ -159,20 +157,15 @@ class tetrisPiece {
     }
 
     numRotations(): number {
-        return tShape(this.shape).length
+        return shapes[this.shape].length
     }
 
     shapeMatrix (id?:number) : number[] {
-        if (!id) {
-            return tShape(this.shape, this.rotation)
-        } else {
-            return tShape(id)
-        }
+        return (id ? shapes[id][0] : shapes[this.shape][this.rotation])
     }
 
-    shapeMatrixAt (i: number) : number {
-        let m = tShape(this.shape, this.rotation)
-        return m[i]
+    shapeMatrixAt (i: number) : number { 
+        return shapes[this.shape][this.rotation][i]
     }
 
     relX (i: number) : number {
@@ -186,10 +179,12 @@ class tetrisPiece {
     rotate (cw: boolean) {
         let r = this.rotation
         // circulate rotation
-
+        let s = ""
         r = ( cw ? r + 1 : r - 1)
+        s += r + " > "
         r = ( r > this.numRotations() - 1 ? 0 : (r < 0 ? this.numRotations() - 1 : r ))
-
+        s += r + " max " + (this.numRotations() - 1)
+        console.log(s)
         this.rotation = r
         for (let i = 0; i < 4; i++) {
             if ( this.relX(i) > 9) {
@@ -203,8 +198,8 @@ class tetrisPiece {
     moveRight () {
         let f = true
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + this.shapeMatrixAt(i) % 4
-            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            let x = this.relX(i)
+            let y = this.relY(i)
             if ((x < 9 && tetris.grid[y][x + 1] != 0) || x == 9 ) {
                 f = false
             }
@@ -217,8 +212,8 @@ class tetrisPiece {
     moveLeft () {
         let f = true
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + this.shapeMatrixAt(i) % 4
-            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            let x = this.relX(i)
+            let y = this.relY(i)
             if ((x > 0 && tetris.grid[y][x - 1] != 0) || x == 0) {
                 f = false
             }
@@ -231,8 +226,8 @@ class tetrisPiece {
     moveDown () {
         // check if there's room below
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + this.shapeMatrixAt(i) % 4
-            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            let x = this.relX(i)
+            let y = this.relY(i)
             if ((y < 19 && tetris.grid[y + 1][x] != 0) || y == 19 ) {
                 this.freeze()
             }
@@ -249,8 +244,8 @@ class tetrisPiece {
     freeze() {
         this.frozen = true
         for (let i = 0; i < 4; i++) {
-            let x = this.posX + this.shapeMatrixAt(i) % 4
-            let y = this.posY + Math.floor(this.shapeMatrixAt(i) / 4)
+            let x = this.relX(i)
+            let y = this.relY(i)
             tetris.grid[y][x] = this.shape
         }
         this.reset(tetris.nextShape())
@@ -270,8 +265,7 @@ class tetrisPiece {
     }
 }
 
-function tShape (s: number, r?: number) : number[] {
-    const shapes: number[][][] = [
+const shapes: number[][][] = [
         [[]],
         [[1, 5, 9, 13], [0, 1, 2, 3]],
         [[1, 5, 6, 10], [1, 2, 4, 5]],
@@ -280,9 +274,7 @@ function tShape (s: number, r?: number) : number[] {
         [[1, 2, 5, 6]],
         [[1, 5, 9, 10], [1, 2, 3, 5], [1, 2, 6, 10], [3, 5, 6, 7]],
         [[1, 5, 8, 9], [0, 4, 5, 6], [1, 2, 5, 9], [0, 1, 2, 6]]
-    ]
-    return shapes[s][r ? r : 0]
-}
+]
 
 let typeImages = [
     assets.image`color7`,
