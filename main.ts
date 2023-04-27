@@ -239,7 +239,14 @@ class tetrisPiece {
 
     drop () {
         while (!this.frozen) {
-            this.moveDown()
+            for (let i = 0; i < 4; i++) {
+                let x = this.relX(i)
+                let y = this.relY(i)
+                if ((y < 19 && tetris.grid[y + 1][x] != 0) || y == 19) {
+                    this.freeze()
+                }
+            }
+            this.posY++
         }
     }
 
