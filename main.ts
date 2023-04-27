@@ -238,7 +238,9 @@ class tetrisPiece {
     }
 
     drop () {
-
+        while (!this.frozen) {
+            this.moveDown()
+        }
     }
 
     freeze() {
@@ -319,5 +321,10 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     piece.moveDown()
+    tetris.drawPiece(piece)
+})
+
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    piece.drop()
     tetris.drawPiece(piece)
 })
