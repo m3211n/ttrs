@@ -56,6 +56,7 @@ class tetrisPiece {
         }
     }
 }
+
 class tetrisGame {
 
     piece: tetrisPiece
@@ -130,20 +131,6 @@ class tetrisGame {
         let piece = new tetrisPiece(p)
         this.piece = piece
         let locked = false
-
-        // piece movement
-
-        while (!locked) {
-            let r = this.piece.row
-            let c = this.piece.col
-            while (!tick) { r++ }
-            this.piece.setLocation(r, c)
-            if (r > 15) {
-                this.lock()
-                locked = true
-            }
-        }
-        this.spawn()
     }
 
     lock () {
@@ -154,6 +141,7 @@ class tetrisGame {
                 this.field[l_row][l_col] = this.piece.matrix[r][c]
             }
         }
+        this.spawn()
     }
 
     updateNext() {
@@ -168,9 +156,8 @@ class tetrisGame {
 
     softDrop(reverse: boolean) {
         this.gravity = reverse ? Math.pow(0.8 - ((this.level - 1) * 0.007), this.level - 1) : 0.05
-        console.log ("Reverse = " + reverse + ", gravity is" + this.gravity)
+        console.log ("Reverse = " + reverse + ", gravity is " + this.gravity)
     }
-
 }
 
 function randomizer () : number {
@@ -203,6 +190,14 @@ function randomizer () : number {
     return n
 } 
 
+function moveDown() {
+    let r = tetris.piece.row
+    let c = tetris.piece.col
+    r++
+    tetris.piece.setLocation(r, c)
+}
+
+
 const color: Image[] = [
     assets.image`color0`,
     assets.image`color1`,
@@ -216,17 +211,24 @@ const color: Image[] = [
 const FIELD_X = 54
 const FIELD_Y = 3
 
-let tick: boolean = false
+let gravityID
+
+let tick: boolean = true
 
 scene.setBackgroundImage(assets.image`game`)
 
 let tetris = new tetrisGame()
 
-
-game.onUpdateInterval(tetris.gravity * 1000, function () {
-    tick = true
-    tick = false
+game.onUpdate( function() {
+    let r = tetris.piece.row
+    let c = tetris.piece.col
+    setInterval(function () {
+        r++
+        tetris.piece.setLocation(r, c)
+    }, 1000 * tetris.gravity)
+    console.log(tetris.gravity)
 })
+
 
 controller.down.onEvent(ControllerButtonEvent.Pressed, function() {
     tetris.softDrop(false)
