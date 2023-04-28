@@ -11,23 +11,24 @@ class tetrisPiece {
 
     shape: number
     rotation: number
-    matrix: number[][]
 
+    matrix: Sprite[][]
+   
     constructor (s: number) {
         this.shape = s
         this.rotation = 0
         this.matrix = []
         for (let i = 0; i < 4; i++) {
-            let r: number[] = []
+            let r: Sprite[] = []
             for (let j = 0; j < 4; j++) {
-                r.push(0)
+                r.push(null)
             }
             this.matrix.push(r)
         }
         for (let i = 0; i < 4; i++) {
             let x = this.pieces[this.shape][this.rotation][i] % 4
             let y = Math.floor(this.pieces[this.shape][this.rotation][i] / 4)
-            this.matrix[y][x] = this.shape
+            this.matrix[y][x] = sprites.create(color[this.shape], SpriteKind.Player)
         }
     }
 }
@@ -35,10 +36,10 @@ class tetrisPiece {
 class tetrisGame {
 
     piece: tetrisPiece
-    field: number[][]
-    nextSprites: Sprite[][]
-    fieldSprites: Sprite[][]
-    holdSprites: Sprite[][]
+    field: Sprite[][]
+
+    nextQueue: number[]
+    holdQueue: number[]
 
     lines: number
     level: number
@@ -48,43 +49,18 @@ class tetrisGame {
     private levelTS: TextSprite
     private scoreTS: TextSprite
 
-
-    color: Image[] = [
-        assets.image`none`,
-        assets.image`color0`,
-        assets.image`color1`,
-        assets.image`color2`,
-        assets.image`color3`,
-        assets.image`color4`,
-        assets.image`color5`,
-        assets.image`color6`
-    ]
-
-    constructor (p: tetrisPiece) {
-
+    constructor () {
         this.lines = 0
         this.level = 1
         this.score = 0
 
         this.field = []
-        this.piece = p
-        for (let r = 0; r < 20; r++) {
-            let row: number[] = []
-            for (let c = 0; c < 10; c++) {
-                row.push(0)
-            }
-            this.field.push(row)
-        }
-        // create sprites
-        this.fieldSprites = []
         for (let r = 0; r < 20; r++) {
             let row: Sprite[] = []
             for (let c = 0; c < 10; c++) {
-                let s = sprites.create(assets.image`color7`, SpriteKind.Player)
-                s.setPosition(54 + c * 6, 3 + r * 6)
-                row.push(s)
+                row.push(null)
             }
-            this.fieldSprites.push(row)
+            this.field.push(row)
         }
 
         this.linesTS = textsprite.create(this.lines.toString())
@@ -98,26 +74,30 @@ class tetrisGame {
         this.scoreTS = textsprite.create(this.score.toString())
         this.scoreTS.setPosition(135, 97)
         this.scoreTS.setMaxFontHeight(10)
-
     }
 
-    resetField() {
-        for (let r = 0; r < 20; r++) {
-            let row: Sprite[] = []
-            for (let c = 0; c < 10; c++) {
-                this.fieldSprites[r][c].setImage(this.pieceColor(this.field[r][c]))
-            }
-        }
-    }
+    start() {
 
-    pieceColor (s: number) : Image {
-        return this.color[s]
+        this.nextQueue.push(Math.randomRange(0, 6))
+
+        this.piece = new tetrisPiece(0)
     }
 
 }
 
+const color: Image[] = [
+    assets.image`none`,
+    assets.image`color0`,
+    assets.image`color1`,
+    assets.image`color2`,
+    assets.image`color3`,
+    assets.image`color4`,
+    assets.image`color5`,
+    assets.image`color6`
+]
+
 scene.setBackgroundImage(assets.image`game`)
 
-let piece = new tetrisPiece(0)
-let tetris = new tetrisGame(piece)
-tetris.resetField()
+let tetris = new tetrisGame()
+
+tetris.start()
