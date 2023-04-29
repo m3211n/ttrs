@@ -87,31 +87,28 @@ function checkCollision (inc_col: number, inc_row: number, inc_rot: number): boo
         }
         ghostMatrix.push(row)
     }
-
-    if (inc_col == -1) {
-
-    } else if (inc_col == 1) {
-
-    } else if (inc_row == 1) {
-
-    } else if (inc_rot != 0) {
-        
-    }
-        {
-        for (let r = 0; r < 4; r ++) {
-            for (let c = 0; c < 4; c ++) {
-                console.log("["+ (c + inc_col + t.col) + "][" + (r + inc_row + t.row) +"]")
-                if (ghostMatrix[c][r]) {
-                    if (matrix[c + inc_col + t.col][r + inc_row + t.row] != null || (r + inc_row + t.row > 22 || c + inc_col + t.col > 9 || c + inc_col + t.col < 0 )) {
+    for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+            if (ghostMatrix[c][r]) {
+                if (inc_col == -1) {
+                    if (c + inc_col + t.col < 0 || (c + inc_col + t.col > 0 && matrix[c + inc_col + t.col][r + inc_row + t.row] != null)) {
                         result = true
                     }
+                } else if (inc_col == 1) {
+                    if (c + inc_col + t.col > 9 || (c + inc_col + t.col < 9 && matrix[c + inc_col + t.col][r + inc_row + t.row] != null)) {
+                        result = true
+                    }
+                } else if (inc_row == 1) {
+                    if (r + inc_row + t.row > 22 || (r + inc_row + t.row < 22 && matrix[c + inc_col + t.col][r + inc_row + t.row] != null)) {
+                        result = true
+                        lock()
+                    }
+                } else if (inc_rot != 0) {
+                    // kick ??
                 }
             }
         }
     }
-    if (result && inc_row != 0) {
-        lock()
-    } 
     return result
 }
 
