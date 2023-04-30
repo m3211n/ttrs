@@ -11,11 +11,13 @@ class Tetrimino {
         this.matrix = []
         this.row = 0
         this.col = 3
+        let max = 3
         let i = 0
-        for (let r = 0; r < 4; r ++) {
+        if (this.shapeID == 0 || this.shapeID == 1) { max = 4 }
+        for (let r = 0; r < max; r ++) {
             let row: Sprite[] = []
-            for (let c = 0; c < 4; c ++) {
-                if (shapes[this.shapeID][this.rotation][i] % 4 == c && Math.floor(shapes[this.shapeID][this.rotation][i]/4) == r) {
+            for (let c = 0; c < max; c ++) {
+                if (shapes[this.shapeID][this.rotation][i] % max == c && Math.floor(shapes[this.shapeID][this.rotation][i] / max) == r) {
                     let tmpSprite = sprites.create(colors[this.shapeID])
                     tmpSprite.setPosition((c + this.col) * 5 + X0, (r + this.row) * 5 + Y0)
                     row.push(tmpSprite)
@@ -32,8 +34,8 @@ class Tetrimino {
         if (!checkCollision(dc, dr, 0)) {
             this.col = this.col + dc
             this.row = this.row + dr
-            for (let r = 0; r < 4; r++) {
-                for (let c = 0; c < 4; c++) {
+            for (let r = 0; r < this.matrix.length; r++) {
+                for (let c = 0; c < this.matrix.length; c++) {
                     if (this.matrix[r][c] != null) {
                         this.matrix[r][c].setPosition((this.col + c) * 5 + X0, (this.row + r) * 5 + Y0)
                     }
@@ -45,13 +47,13 @@ class Tetrimino {
     rotateBy (rotation: number) {
         this.rotation = rotation
         let i = 0
-        for (let r = 0; r < 4; r++) {
-            for (let c = 0; c < 4; c++) {
+        for (let r = 0; r < this.matrix.length; r++) {
+            for (let c = 0; c < this.matrix.length; c++) {
                 if (this.matrix[r][c] != null) {
                     this.matrix[r][c].destroy()
                     this.matrix[r][c] = null
                 }
-                if (shapes[this.shapeID][this.rotation][i] % 4 == c && Math.floor(shapes[this.shapeID][this.rotation][i] / 4) == r) {
+                if (shapes[this.shapeID][this.rotation][i] % this.matrix.length == c && Math.floor(shapes[this.shapeID][this.rotation][i] / this.matrix.length) == r) {
                     let tmpSprite = sprites.create(colors[this.shapeID])
                     tmpSprite.setPosition((this.col + c) * 5 + X0, (this.row + r) * 5 + Y0)
                     this.matrix[r][c] = tmpSprite 
@@ -63,10 +65,11 @@ class Tetrimino {
 }
 
 function lock() {
-    for (let r = 0; r < 4; r ++) {
-        for (let c = 0; c < 4; c ++) {
+    for (let r = 0; r < t.matrix.length; r ++) {
+        for (let c = 0; c < t.matrix.length; c ++) {
             if (t.matrix[r][c] != null) {
-                matrix[r + t.row][c + t.col] == t.matrix[r][c]
+                matrix[r + t.row][c + t.col] = t.matrix[r][c]
+                console.log("Moved t.matrix[" + r + ", " + c + "] >> matrix[" + (r + t.row) + ", " + (c + t.col) + "]")
             } 
         }
     }
@@ -74,22 +77,10 @@ function lock() {
 }
 
 function checkCollision (inc_col: number, inc_row: number, inc_rot: number): boolean {
-    let ghostMatrix: boolean[][] = []
     let result = false
-    let i = 0
-    for (let r = 0; r < 4; r ++) {
-        let row: boolean[] = []
-        for (let c = 0; c < 4; c ++) {
-            if (shapes[t.shapeID][t.rotation + inc_rot][i] % 4 == c && Math.floor(shapes[t.shapeID][t.rotation + inc_rot][i] / 4) == r) {
-                row.push(true)
-                i++
-            } else row.push(false)
-        }
-        ghostMatrix.push(row)
-    }
-    for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-            if (ghostMatrix[c][r]) {
+    for (let r = 0; r < t.matrix.length; r++) {
+        for (let c = 0; c < t.matrix.length; c++) {
+            if (t.matrix[r][c] != null) {
                 if (inc_col == -1) {
                     if (c + inc_col + t.col < 0 || (c + inc_col + t.col > 0 && matrix[c + inc_col + t.col][r + inc_row + t.row] != null)) {
                         result = true
@@ -99,27 +90,41 @@ function checkCollision (inc_col: number, inc_row: number, inc_rot: number): boo
                         result = true
                     }
                 } else if (inc_row == 1) {
-                    if (r + inc_row + t.row > 22 || (r + inc_row + t.row < 22 && matrix[c + inc_col + t.col][r + inc_row + t.row] != null)) {
-                        result = true
+                    if (r + inc_row + t.row < 21 && matrix[r + inc_row + t.row][c + inc_col + t.col] != null) {
+                        lock()
+                    } else if (r + inc_row + t.row == 21) {
                         lock()
                     }
                 } else if (inc_rot != 0) {
                     // kick ??
+                    let i = 0
+                    let ghostMatrix: boolean[][] = []
+                    for (let r = 0; r < t.matrix.length; r++) {
+                        let row: boolean[] = []
+                        for (let c = 0; c < t.matrix.length; c++) {
+                            if (shapes[t.shapeID][t.rotation + inc_rot][i] % t.matrix.length == c && Math.floor(shapes[t.shapeID][t.rotation + inc_rot][i] / t.matrix.length) == r) {
+                                row.push(true)
+                                i++
+                            } else row.push(false)
+                        }
+                        ghostMatrix.push(row)
+                    }
                 }
             }
         }
     }
+    console.log("----------------")
     return result
 }
 
 const shapes = [
-    [[4, 5, 6, 7], [2, 6, 10, 14], [8, 9, 10, 11], [1, 5, 9, 13]],
-    [[0, 4, 5, 6], [1, 2, 5, 9], [4, 5, 6, 10], [1, 5, 8, 9]],
-    [[2, 4, 5, 6], [1, 5, 9, 10], [4, 5, 6, 8], [0, 1, 5, 9]],
-    [[1, 2, 5, 6], [1, 2, 5, 6], [1, 2, 5, 6], [1, 2, 5, 6]],
-    [[1, 2, 4, 5], [1, 5, 6, 10], [5, 6, 8, 9], [0, 4, 5, 9]],
-    [[1, 4, 5, 6], [1, 5, 6, 9], [4, 5, 6, 9], [1, 4, 5, 9]],
-    [[0, 1, 5, 6], [2, 5, 6, 9], [4, 5, 9, 10], [1, 4, 5, 8]]
+    [[8, 9, 10, 11], [2, 6, 10, 14]],
+    [[5, 6, 9, 10]],
+    [[0, 1, 2, 5], [1, 4, 6, 7], [0, 3, 4, 5], [1, 2, 4, 7]],
+    [[3, 4, 5, 6], [0, 1, 4, 7], [2, 3, 4, 5], [1, 4, 7, 8]],
+    [[4, 5, 6, 7], [1, 4, 5, 8], [4, 5, 6, 7], [1, 4, 5, 8]],
+    [[3, 4, 5, 7], [1, 3, 4, 7], [1, 3, 4, 5], [1, 4, 5, 7]],
+    [[3, 4, 7, 8], [2, 4, 5, 7], [3, 4, 7, 8], [2, 4, 5, 7]],
 ]
 
 const colors: Image[] = [
@@ -148,7 +153,6 @@ for (let r = 0; r < 22; r ++) {
 scene.setBackgroundImage(assets.image`game`)
 
 let t = new Tetrimino(5)
-checkCollision(1, 1, 1)
 
 controller.down.onEvent(ControllerButtonEvent.Repeated, function() {
     t.moveBy(0, 1)
