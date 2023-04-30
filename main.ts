@@ -245,3 +245,7 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
     t.rotateBy(1)
 })
+
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    t.rotateBy(-1)
+})
