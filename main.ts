@@ -45,7 +45,11 @@ class Tetrimino {
     }
 
     rotateBy (rotation: number) {
-        this.rotation = rotation
+        let r = this.rotation
+        r += rotation
+        if (r > 3) { r = 0 }
+        if (r < 0) { r = 3 }
+        this.rotation = r
         let i = 0
         for (let r = 0; r < this.matrix.length; r++) {
             for (let c = 0; c < this.matrix.length; c++) {
@@ -64,7 +68,48 @@ class Tetrimino {
     }
 }
 
+class Bag {
+
+    contents: number[]
+
+    constructor () {
+        this.contents = []
+        let full = false
+        while (!full) {
+            let rnd = Math.randomRange(0, 6)
+            if (this.contents.indexOf(rnd) == -1) {
+                this.contents.push(rnd)
+            }
+            if (this.contents.length == 7) {
+                full = true
+            }
+        }
+    }
+
+    deal (): number {
+        if (this.contents.length > 0) {
+            return this.contents.pop()
+        } else {
+            let full = false
+            while (!full) {
+                let rnd = Math.randomRange(0, 6)
+                if (this.contents.indexOf(rnd) == -1) {
+                    this.contents.push(rnd)
+                }
+                if (this.contents.length == 7) {
+                    full = true
+                }
+            }
+            return this.contents.pop()
+        }
+    }
+
+}
+
 function lock() {
+    if (t.row == -1) {
+        game.over(false)
+    }
     for (let r = 0; r < t.matrix.length; r ++) {
         for (let c = 0; c < t.matrix.length; c ++) {
             if (t.matrix[r][c] != null) {
@@ -73,8 +118,26 @@ function lock() {
             } 
         }
     }
-    t = new Tetrimino(5)
+    clearRows()
+    t = new Tetrimino(b.deal())
 }
+
+function clearRows () {
+    for (let r = 0; r < 20; r ++) {
+        r += 2
+        if (matrix[r].indexOf(null) == -1) {
+            for (let tile of matrix[r]) {
+                tile.destroy()
+            }
+            matrix.removeAt(r)
+            let emptyRow: Sprite[] = []
+            for (let c = 0; c < 10; c++) {
+                emptyRow.push(null)
+            }
+            matrix.unshift(emptyRow)
+        }
+    }
+} 
 
 function checkCollision (inc_col: number, inc_row: number, inc_rot: number): boolean {
     let result = false
@@ -118,8 +181,8 @@ function checkCollision (inc_col: number, inc_row: number, inc_rot: number): boo
 }
 
 const shapes = [
-    [[8, 9, 10, 11], [2, 6, 10, 14]],
-    [[5, 6, 9, 10]],
+    [[8, 9, 10, 11], [2, 6, 10, 14], [8, 9, 10, 11], [2, 6, 10, 14]],
+    [[5, 6, 9, 10], [5, 6, 9, 10], [5, 6, 9, 10], [5, 6, 9, 10]],
     [[0, 1, 2, 5], [1, 4, 6, 7], [0, 3, 4, 5], [1, 2, 4, 7]],
     [[3, 4, 5, 6], [0, 1, 4, 7], [2, 3, 4, 5], [1, 4, 7, 8]],
     [[4, 5, 6, 7], [1, 4, 5, 8], [4, 5, 6, 7], [1, 4, 5, 8]],
@@ -152,7 +215,8 @@ for (let r = 0; r < 22; r ++) {
 
 scene.setBackgroundImage(assets.image`game`)
 
-let t = new Tetrimino(5)
+let b = new Bag()
+let t = new Tetrimino(b.deal())
 
 controller.down.onEvent(ControllerButtonEvent.Repeated, function() {
     t.moveBy(0, 1)
@@ -176,4 +240,12 @@ controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
 
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     t.moveBy(1, 0)
+})
+
+controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
+    t.rotateBy(1)
+})
+
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    t.rotateBy(-1)
 })
