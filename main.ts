@@ -38,7 +38,6 @@ class Matrix {
         for (let r = 0; r < n; r ++) {
             for (let c = 0; c < n; c ++) {
                 if (this.t.cells[r][c] != null) {
-                    if (r + this.t.r < 0) { this.moveTo(r, this.t.c) } // wall kick top
                     this.colors[r + this.t.r][c + this.t.c] = this.t.cells[r][c]
                 }
             }
@@ -108,6 +107,14 @@ class Matrix {
             }
         }
         this.t.cells = tm
+        // simple wall kicks
+        for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n; c++) {
+                if (r + this.t.r < 0) { this.moveTo(r, this.t.c) } // wall kick top
+                if (c + this.t.c < 0) { this.moveTo(this.t.r, c) } // wall kick left
+                if (c + this.t.c > 9) { this.moveTo(this.t.r, 9 - c) } // wall kick right
+            }
+        }
         // respawn the tetrimino after rotation
         this.respawn()
     }
@@ -115,7 +122,7 @@ class Matrix {
     move(vert: boolean, inc: number) {
         let next_r = vert ? this.t.r + inc : this.t.r
         let next_c = vert ? this.t.c : this.t.c + inc
-        if (!this.checkCollision(next_r, next_c, 0)) {
+        if (!this.checkCollision(next_r, next_c, this.t.cells)) {
             this.clear()
             this.t.r = next_r
             this.t.c = next_c
@@ -128,19 +135,24 @@ class Matrix {
         this.t.c = c
     }
 
-    checkCollision(next_r: number, next_c: number, next_rotation: number): boolean {
+    checkCollision(next_r: number, next_c: number, cells: number[][]): boolean {
         let result = false
         let n = this.t.cells.length
-        // check left edge
-        if (next_c < 0) { result = true }
-        // check right edge
+        // check edges
         for (let r = 0; r < n; r ++) {
             for (let c = 0; c < n; c ++) {
-                if (this.t.cells[r][c] != null && c + next_c > 9) { result = true }
+                if (this.t.cells[r][c] != null) {
+                    if (c + next_c < 0 || c + next_c > 9 || r + next_r > 21) { 
+                        result = true
+                    }
+                }
             }
         }
-
         return result
+    }
+
+    lock() {
+        console.log("Locked!")
     }
 }
 

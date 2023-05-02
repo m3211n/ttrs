@@ -35,30 +35,6 @@ a 1 a a a
 a a a a a 
 a a a a a 
 `;
-            case "image2":
-            case "color1":return img`
-8 8 8 8 8 
-8 1 1 8 8 
-8 1 8 8 8 
-8 8 8 8 8 
-8 8 8 8 8 
-`;
-            case "image3":
-            case "color2":return img`
-4 4 4 4 4 
-4 1 1 4 4 
-4 1 4 4 4 
-4 4 4 4 4 
-4 4 4 4 4 
-`;
-            case "image5":
-            case "color4":return img`
-6 6 6 6 6 
-6 1 1 6 6 
-6 1 6 6 6 
-6 6 6 6 6 
-6 6 6 6 6 
-`;
             case "image7":
             case "color6":return img`
 2 2 2 2 2 
@@ -189,6 +165,30 @@ fffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 ffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 fffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+`;
+            case "image2":
+            case "color1":return img`
+8 8 8 8 8 
+8 d d 8 8 
+8 d 8 8 8 
+8 8 8 8 8 
+8 8 8 8 8 
+`;
+            case "image3":
+            case "color2":return img`
+4 4 4 4 4 
+4 5 5 4 4 
+4 5 4 4 4 
+4 4 4 4 4 
+4 4 4 4 4 
+`;
+            case "image5":
+            case "color4":return img`
+6 6 6 6 6 
+6 7 7 6 6 
+6 7 6 6 6 
+6 6 6 6 6 
+6 6 6 6 6 
 `;
         }
         return null;
