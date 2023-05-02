@@ -3,29 +3,69 @@ namespace myImages {
 
     helpers._registerFactory("image", function(name: string) {
         switch(helpers.stringTrim(name)) {
+            case "image4":
+            case "color3":return img`
+1 1 1 5 
+1 5 5 5 
+5 5 5 5 
+5 5 5 5 
+`;
             case "image9":
             case "color7":return img`
-c c c c c 
-c c c c c 
-c c c c c 
-c c c c c 
-c c c c c 
+b b b b 
+b . . b 
+b . . b 
+b b b b 
 `;
-            case "image10":
-            case "none":return img`
-. . . . . 
-. . . . . 
-. . . . . 
-. . . . . 
-. . . . . 
+            case "image1":
+            case "color0":return img`
+1 1 1 d 
+1 d d d 
+d d d d 
+d d d d 
+`;
+            case "image6":
+            case "color5":return img`
+1 a a c 
+a c c c 
+c c c c 
+c c c c 
+`;
+            case "image2":
+            case "color1":return img`
+d 9 9 8 
+9 8 8 8 
+8 8 8 8 
+8 8 8 8 
+`;
+            case "image3":
+            case "color2":return img`
+1 5 5 4 
+5 4 4 4 
+4 4 4 4 
+4 4 4 4 
+`;
+            case "image5":
+            case "color4":return img`
+1 7 7 6 
+7 6 6 6 
+6 6 6 6 
+6 6 6 6 
+`;
+            case "image7":
+            case "color6":return img`
+1 5 5 2 
+5 2 2 2 
+2 2 2 2 
+2 2 2 2 
 `;
             case "image8":
             case "game":return img`
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffffffffffff
-ffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffff1fff1f11111f1fff1f11111fffffffffff
 fffffffffffffff222222222222222ffffffffffffffffffffffffbfffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffffffffffffff11ff1f1ffffff1f1ffff1fffffffffffff
@@ -142,54 +182,12 @@ ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 `;
-            case "image2":
-            case "color1":return img`
-9 9 9 8 
-9 8 8 8 
-8 8 8 8 
-8 8 8 8 
-`;
-            case "image3":
-            case "color2":return img`
-5 5 5 4 
-5 4 4 4 
-4 4 4 4 
-4 4 4 4 
-`;
-            case "image5":
-            case "color4":return img`
-7 7 7 6 
-7 6 6 6 
-6 6 6 6 
-6 6 6 6 
-`;
-            case "image1":
-            case "color0":return img`
-d d d 9 
-d 9 9 9 
-9 9 9 9 
-9 9 9 9 
-`;
-            case "image6":
-            case "color5":return img`
-a a a c 
-a c c c 
-c c c c 
-c c c c 
-`;
-            case "image7":
-            case "color6":return img`
-4 4 4 2 
-4 2 2 2 
-2 2 2 2 
-2 2 2 2 
-`;
-            case "image4":
-            case "color3":return img`
-1 1 1 5 
-1 5 5 5 
-5 5 5 5 
-5 5 5 5 
+            case "image10":
+            case "none":return img`
+. . . . 
+. . . . 
+. . . . 
+. . . . 
 `;
         }
         return null;
