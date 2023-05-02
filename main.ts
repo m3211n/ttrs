@@ -19,6 +19,7 @@ class Matrix {
             this.cells.push(row)
             this.colors.push(c_row)
         }
+        this.respawn()
     }
 
     respawn() {
@@ -61,6 +62,7 @@ class Matrix {
     }
 
     rotate(cw: boolean) {
+        //remove the existing tetrimino from the matrix
         let n = this.t.cells.length
         for (let r = 0; r < n; r++) {
             for (let c = 0; c <= n; c++) {
@@ -69,10 +71,45 @@ class Matrix {
                 }
             }
         }
-        this.t.rotate(cw)
+
+        // rotate the tetrimino
+        let tm = []
+        if (cw) {
+            // transpose
+            for (let i = 0; i < n; i++) {
+                tm.push([])
+            }
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    tm[j].push(this.t.cells[i][j])
+                }
+            }
+            // reverse
+            for (let i = 0; i < n; i++) {
+                tm[i].reverse()
+            }
+        } else {
+            // reverse
+            for (let i = 0; i < n; i++) {
+                this.t.cells[i].reverse()
+            }
+            // transpose
+            for (let i = 0; i < n; i++) {
+                tm.push([])
+            }
+
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    tm[j].push(this.t.cells[i][j])
+                }
+            }
+        }
+        this.t.cells = tm
+
+        // respawn the tetrimino after rotation
         this.respawn()
     }
-
 }
 
 class Tetrimino {
@@ -109,43 +146,6 @@ class Tetrimino {
     moveTo(r: number, c: number) {
         this.r = r
         this.c = c
-    }
-
-    rotate(cw: boolean) {
-        let n = this.cells.length
-        let tm = []
-        if (cw) {
-            // transpose
-            for (let i = 0; i < n; i ++) {
-                tm.push([])
-            }
-
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j ++) {
-                    tm[j].push(this.cells[i][j])
-                }
-            }
-            // reverse
-            for (let i = 0; i < n; i ++) {
-                tm[i].reverse()
-            }
-        } else {
-            // reverse
-            for (let i = 0; i < n; i++) {
-                this.cells[i].reverse()
-            }
-            // transpose
-            for (let i = 0; i < n; i++) {
-                tm.push([])
-            }
-
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    tm[j].push(this.cells[i][j])
-                }
-            }
-        }
-        this.cells = tm
     }
 }
 
@@ -213,10 +213,6 @@ scene.setBackgroundImage(assets.image`game`)
 let bag = new Bag()
 let tetrimino = new Tetrimino(bag.deal())
 let matrix = new Matrix(tetrimino)
-
-matrix.respawn()
-
-let i = 0
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
     matrix.rotate(true)
