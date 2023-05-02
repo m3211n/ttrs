@@ -22,12 +22,23 @@ class Matrix {
         this.respawn()
     }
 
+    clear() {
+        let n = this.t.cells.length
+        for (let r = 0; r < n; r++) {
+            for (let c = 0; c <= n; c++) {
+                if (this.t.cells[r][c] != null) {
+                    this.colors[r + this.t.r][c + this.t.c] = null
+                }
+            }
+        }
+    }
+
     respawn() {
         let n = this.t.cells.length
         for (let r = 0; r < n; r ++) {
             for (let c = 0; c < n; c ++) {
                 if (this.t.cells[r][c] != null) {
-                    if (r + this.t.r < 0) { this.t.moveTo(r, this.t.c) } // wall kick top
+                    if (r + this.t.r < 0) { this.moveTo(r, this.t.c) } // wall kick top
                     this.colors[r + this.t.r][c + this.t.c] = this.t.cells[r][c]
                 }
             }
@@ -63,16 +74,10 @@ class Matrix {
 
     rotate(cw: boolean) {
         //remove the existing tetrimino from the matrix
-        let n = this.t.cells.length
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c <= n; c++) {
-                if (this.t.cells[r][c] != null) {
-                    this.colors[r + this.t.r][c + this.t.c] = null
-                }
-            }
-        }
+        this.clear()
 
         // rotate the tetrimino
+        let n = this.t.cells.length
         let tm = []
         if (cw) {
             // transpose
@@ -110,6 +115,18 @@ class Matrix {
         // respawn the tetrimino after rotation
         this.respawn()
     }
+
+    move(vert: true, inc: number) {
+        this.clear()
+        this.t.r = vert ? this.t.r + inc : this.t.r
+        this.t.c = vert ? this.t.c : this.t.c + inc
+        this.respawn()
+    }
+
+    moveTo(r: number, c: number) {
+        this.t.r = r
+        this.t.c = c
+    }
 }
 
 class Tetrimino {
@@ -137,23 +154,15 @@ class Tetrimino {
             this.cells.push(row)
         }
     }
-
-    move(vert: true, inc: number) {
-        this.r = vert ? this.r + inc : this.r
-        this.c = vert ? this.c : this.c + inc
-    }
-
-    moveTo(r: number, c: number) {
-        this.r = r
-        this.c = c
-    }
 }
 
 class Bag {
+    preview: Sprite[][]
 
     contents: number[]
 
     constructor () {
+        this.preview = []
         this.contents = []
         let full = false
         while (!full) {
@@ -165,12 +174,18 @@ class Bag {
                 full = true
             }
         }
+        for (let r = 0; r < 4; r ++) {
+            let row: Sprite[] = []
+            for (let c = 0; c < 4; c ++) {
+                let tmp_sprite = sprites.create(assets.image`none`)
+                tmp_sprite.setPosition(c * 5 + 98, r * 5 + 21)
+                row.push(tmp_sprite)
+            }
+            this.preview.push(row)
+        }
     }
-
     deal (): number {
-        if (this.contents.length > 0) {
-            return this.contents.pop()
-        } else {
+        if (this.contents.length < 1) {
             let full = false
             while (!full) {
                 let rnd = Math.randomRange(0, 6)
@@ -181,8 +196,15 @@ class Bag {
                     full = true
                 }
             }
-            return this.contents.pop()
         }
+        let next = this.contents.shift()
+        let tPreview = new Tetrimino(this.contents[0])
+        for (let r = 0; r < tPreview.cells.length; r ++) {
+            for (let c = 0; c < tPreview.cells.length; c ++) {
+                this.preview[r][c].setImage(colors[tPreview.cells[r][c]])
+            }
+        }
+        return next
     }
 }
 
@@ -205,7 +227,7 @@ const colors: Image[] = [
     assets.image`color6`
 ]
 
-const X0 = 58
+const X0 = 36
 const Y0 = 8
 
 scene.setBackgroundImage(assets.image`game`)
