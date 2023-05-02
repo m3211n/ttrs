@@ -75,7 +75,6 @@ class Matrix {
     rotate(cw: boolean) {
         //remove the existing tetrimino from the matrix
         this.clear()
-
         // rotate the tetrimino
         let n = this.t.cells.length
         let tm = []
@@ -84,7 +83,6 @@ class Matrix {
             for (let i = 0; i < n; i++) {
                 tm.push([])
             }
-
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
                     tm[j].push(this.t.cells[i][j])
@@ -103,7 +101,6 @@ class Matrix {
             for (let i = 0; i < n; i++) {
                 tm.push([])
             }
-
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
                     tm[j].push(this.t.cells[i][j])
@@ -111,21 +108,39 @@ class Matrix {
             }
         }
         this.t.cells = tm
-
         // respawn the tetrimino after rotation
         this.respawn()
     }
 
-    move(vert: true, inc: number) {
-        this.clear()
-        this.t.r = vert ? this.t.r + inc : this.t.r
-        this.t.c = vert ? this.t.c : this.t.c + inc
-        this.respawn()
+    move(vert: boolean, inc: number) {
+        let next_r = vert ? this.t.r + inc : this.t.r
+        let next_c = vert ? this.t.c : this.t.c + inc
+        if (!this.checkCollision(next_r, next_c, 0)) {
+            this.clear()
+            this.t.r = next_r
+            this.t.c = next_c
+            this.respawn()
+        }
     }
 
     moveTo(r: number, c: number) {
         this.t.r = r
         this.t.c = c
+    }
+
+    checkCollision(next_r: number, next_c: number, next_rotation: number): boolean {
+        let result = false
+        let n = this.t.cells.length
+        // check left edge
+        if (next_c < 0) { result = true }
+        // check right edge
+        for (let r = 0; r < n; r ++) {
+            for (let c = 0; c < n; c ++) {
+                if (this.t.cells[r][c] != null && c + next_c > 9) { result = true }
+            }
+        }
+
+        return result
     }
 }
 
@@ -178,7 +193,7 @@ class Bag {
             let row: Sprite[] = []
             for (let c = 0; c < 4; c ++) {
                 let tmp_sprite = sprites.create(assets.image`none`)
-                tmp_sprite.setPosition(c * 5 + 98, r * 5 + 21)
+                tmp_sprite.setPosition(c * 5 + 100, r * 5 + 8)
                 row.push(tmp_sprite)
             }
             this.preview.push(row)
@@ -201,7 +216,11 @@ class Bag {
         let tPreview = new Tetrimino(this.contents[0])
         for (let r = 0; r < tPreview.cells.length; r ++) {
             for (let c = 0; c < tPreview.cells.length; c ++) {
-                this.preview[r][c].setImage(colors[tPreview.cells[r][c]])
+                if (tPreview.cells[r][c] != null) {
+                    this.preview[r][c].setImage(colors[tPreview.cells[r][c]])
+                } else {
+                    this.preview[r][c].setImage(assets.image`none`)
+                }
             }
         }
         return next
@@ -242,4 +261,28 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
 
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.rotate(false)
+})
+
+controller.down.onEvent(ControllerButtonEvent.Repeated, function() {
+    matrix.move(true, 1)
+})
+
+controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
+    matrix.move(false, -1)
+})
+
+controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
+    matrix.move(false, 1)
+})
+
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    matrix.move(true, 1)
+})
+
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    matrix.move(false, -1)
+})
+
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    matrix.move(false, 1)
 })
