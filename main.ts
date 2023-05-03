@@ -72,9 +72,7 @@ class Matrix {
     }
 
     rotate(cw: boolean) {
-        //remove the existing tetrimino from the matrix
-        this.clear()
-        // rotate the tetrimino
+        // create the rotated copy of the tetrimino
         let n = this.t.cells.length
         let tm = []
         if (cw) {
@@ -106,19 +104,155 @@ class Matrix {
                 }
             }
         }
-        this.t.cells = tm
-        // basic wall kicks
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (r + this.t.r < 0) { this.moveTo(r, this.t.c) } // wall kick top
-                if (c + this.t.c < 0) { this.moveTo(this.t.r, c) } // wall kick left
-                if (c + this.t.c > 9) { this.moveTo(this.t.r, 9 - c) } // wall kick right
+
+        // check if wall kicks are needed
+        let canRotate = false
+        let x_k = 0
+        let y_k = 0
+        let testID = 1
+        while (!canRotate && testID <= 5) {
+            [canRotate, y_k, x_k] = this.canRotate(testID, this.t.rotation, cw, tm)
+            testID ++
+        }
+        // if wall kicks not needed
+        if (canRotate) {
+            this.clear()
+            this.t.cells = tm
+            this.t.r = this.t.r + y_k
+            this.t.c = this.t.c + x_k
+            this.respawn()
+
+            // update the rotation property
+            if (cw) {
+                if (this.t.rotation == Rotation.Zero) { 
+                    this.t.rotation = Rotation.Right 
+                } else if (this.t.rotation == Rotation.Right) {
+                    this.t.rotation = Rotation.Two
+                } else if (this.t.rotation == Rotation.Two) {
+                    this.t.rotation = Rotation.Left
+                } else {
+                    this.t.rotation = Rotation.Zero
+                }
+            } else {
+                if (this.t.rotation == Rotation.Zero) {
+                    this.t.rotation = Rotation.Left
+                } else if (this.t.rotation == Rotation.Right) {
+                    this.t.rotation = Rotation.Zero
+                } else if (this.t.rotation == Rotation.Two) {
+                    this.t.rotation = Rotation.Right
+                } else {
+                    this.t.rotation = Rotation.Two
+                }
             }
         }
-        // advanced wall kicks
+    }
 
-        // respawn the tetrimino after rotation
-        this.respawn()
+    canRotate(testID: number, rot: number, cw: boolean, rotatedCells: number[][]): [boolean, number, number] {
+
+        const z_r = (rot == Rotation.Zero && cw)
+        const r_z = (rot == Rotation.Right && !cw)
+        const r_t = (rot == Rotation.Right && cw)
+        const t_r = (rot == Rotation.Two && !cw)
+        const t_l = (rot == Rotation.Two && cw)
+        const l_t = (rot == Rotation.Left && !cw)
+        const l_z = (rot == Rotation.Left && cw)
+        const z_l = (rot == Rotation.Zero && !cw)
+
+        let x_k = 0
+        let y_k = 0
+
+        switch (testID) {
+            case 1:
+                break
+            case 2:
+                if (this.t.shapeID == 0) {
+                    if (z_r || l_z) { 
+                        x_k = -2; 
+                    } else if (r_z || t_l) {
+                        x_k = 2;
+                    } else if (r_t || z_l) {
+                        x_k = -1;
+                    } else {
+                        x_k = 1;
+                    }
+                } else {
+                    if (z_r || t_r || l_t || l_z) {
+                        x_k = -1
+                    } else {
+                        x_k = 1
+                    }
+                }
+                break
+            case 3:
+                if (this.t.shapeID == 0) {
+                    if (z_r || l_t) {
+                        x_k = 1
+                    } else if (r_z || t_l) {
+                        x_k = -1
+                    } else if (r_t || z_l) {
+                        x_k = 2;
+                    } else {
+                        x_k = -2;
+                    }
+                } else {
+                    if (z_r || t_r) {
+                        x_k = -1; y_k = 1
+                    } else if (rot == Rotation.Right) {
+                        x_k = 1; y_k = -1
+                    } else if (t_l || z_l) {
+                        x_k = 1; y_k = 1
+                    } else {
+                        x_k = -1; y_k = -1
+                    }
+                }
+                break
+            case 4:
+                if (this.t.shapeID == 0) {
+                    if (z_r || l_t) {
+                        x_k = -2; y_k = -1
+                    } else if (r_z || t_l) {
+                        x_k = 2; y_k = 1
+                    } else if (r_t || z_l) {
+                        x_k = 2; y_k = -1
+                    } else {
+                        x_k = -2; y_k = 1
+                    }
+                } else {
+                    if (z_r || t_r || t_l || z_l) {
+                        y_k = -2
+                    } else {
+                        y_k = 2
+                    }
+                }
+                break
+            case 5:
+                if (this.t.shapeID == 0) {
+                    if (z_r || l_t) {
+                        x_k = 1; y_k = 2
+                    } else if (r_z || t_l) {
+                        x_k = -1; y_k = -2
+                    } else if (r_t || z_l) {
+                        x_k = 2; y_k = -1
+                    } else {
+                        x_k = -2; y_k = 1
+                    }
+                } else {
+                    if (z_r || t_r) {
+                        x_k = -1; y_k = -2
+                    } else if (r_z || r_t) {
+                        x_k = 1; y_k = 2
+                    } else if (t_l || z_l) {
+                        x_k = 1; y_k = -2
+                    } else {
+                        x_k = -1; y_k = 2
+                    }
+                }
+                break
+        }
+        let result = !(this.checkCollision(this.t.r + y_k, this.t.c + x_k, rotatedCells))
+        return [
+            result, y_k, x_k
+        ]
     }
 
     move(vert: boolean, inc: number) {
@@ -134,11 +268,6 @@ class Matrix {
                 this.lock()
             }
         }
-    }
-
-    moveTo(r: number, c: number) {
-        this.t.r = r
-        this.t.c = c
     }
 
     checkCollision(next_r: number, next_c: number, cells: number[][]): boolean {
@@ -157,7 +286,6 @@ class Matrix {
             }
             r++
         }
-        console.log(result)
         return result
     }
 
@@ -179,11 +307,14 @@ class Matrix {
 class Tetrimino {
     cells: number[][]
     rotation: number
+    shapeID: number 
     r: number
     c: number
 
     constructor(shape: number) {
+        this.shapeID = shape
         this.cells = []
+        this.rotation = Rotation.Zero
         this.r = (shape == 0) ? -1 : 0
         this.c = (shape == 3) ? 4 : 3 
         let max = (shape == 0) ? 4 : ((shape == 3) ? 2 : 3)
@@ -288,7 +419,14 @@ const colors: Image[] = [
 ]
 
 const X0 = 36
-const Y0 = 8                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+const Y0 = 8
+
+enum Rotation {
+    Zero = 0,
+    Right = 1,
+    Two = 2,
+    Left = 3
+}
 
 let level: number = 1
 let score: number = 0
