@@ -3,46 +3,6 @@ namespace myImages {
 
     helpers._registerFactory("image", function(name: string) {
         switch(helpers.stringTrim(name)) {
-            case "image10":
-            case "none":return img`
-. . . . . 
-. . . . . 
-. . b . . 
-. . . . . 
-. . . . . 
-`;
-            case "image4":
-            case "color3":return img`
-5 5 5 5 5 
-5 1 1 5 5 
-5 1 5 5 5 
-5 5 5 5 5 
-5 5 5 5 5 
-`;
-            case "image1":
-            case "color0":return img`
-d d d d d 
-d 1 1 d d 
-d 1 d d d 
-d d d d d 
-d d d d d 
-`;
-            case "image6":
-            case "color5":return img`
-a a a a a 
-a 1 1 a a 
-a 1 a a a 
-a a a a a 
-a a a a a 
-`;
-            case "image7":
-            case "color6":return img`
-2 2 2 2 2 
-2 1 1 2 2 
-2 1 2 2 2 
-2 2 2 2 2 
-2 2 2 2 2 
-`;
             case "image8":
             case "game":return img`
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -166,29 +126,125 @@ ffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 fffffffffffffffffffffffffffffffbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 `;
+            case "image4":
+            case "color3":return img`
+5 5 5 5 5 
+5 1 1 1 5 
+5 1 5 5 5 
+5 1 5 5 5 
+5 5 5 5 5 
+`;
+            case "image1":
+            case "color0":return img`
+d d d d d 
+d 1 1 1 d 
+d 1 d d d 
+d 1 d d d 
+d d d d d 
+`;
             case "image2":
             case "color1":return img`
 8 8 8 8 8 
-8 d d 8 8 
+8 d d d 8 
 8 d 8 8 8 
-8 8 8 8 8 
+8 d 8 8 8 
 8 8 8 8 8 
 `;
             case "image3":
             case "color2":return img`
 4 4 4 4 4 
-4 5 5 4 4 
+4 5 5 5 4 
 4 5 4 4 4 
-4 4 4 4 4 
+4 5 4 4 4 
 4 4 4 4 4 
 `;
             case "image5":
             case "color4":return img`
 6 6 6 6 6 
-6 7 7 6 6 
+6 7 7 7 6 
+6 7 6 6 6 
 6 7 6 6 6 
 6 6 6 6 6 
+`;
+            case "image9":
+            case "locked_color3":return img`
+5 5 5 5 5 
+5 5 5 5 5 
+5 5 5 5 5 
+5 5 5 5 5 
+5 5 5 5 5 
+`;
+            case "image11":
+            case "locked_color0":return img`
+d d d d d 
+d d d d d 
+d d d d d 
+d d d d d 
+d d d d d 
+`;
+            case "image12":
+            case "locked_color1":return img`
+8 8 8 8 8 
+8 8 8 8 8 
+8 8 8 8 8 
+8 8 8 8 8 
+8 8 8 8 8 
+`;
+            case "image13":
+            case "locked_color2":return img`
+4 4 4 4 4 
+4 4 4 4 4 
+4 4 4 4 4 
+4 4 4 4 4 
+4 4 4 4 4 
+`;
+            case "image14":
+            case "locked_color4":return img`
 6 6 6 6 6 
+6 6 6 6 6 
+6 6 6 6 6 
+6 6 6 6 6 
+6 6 6 6 6 
+`;
+            case "image15":
+            case "locked_color5":return img`
+a a a a a 
+a a a a a 
+a a a a a 
+a a a a a 
+a a a a a 
+`;
+            case "image16":
+            case "locked_color6":return img`
+2 2 2 2 2 
+2 2 2 2 2 
+2 2 2 2 2 
+2 2 2 2 2 
+2 2 2 2 2 
+`;
+            case "image7":
+            case "color6":return img`
+2 2 2 2 2 
+2 3 3 3 2 
+2 3 2 2 2 
+2 3 2 2 2 
+2 2 2 2 2 
+`;
+            case "image6":
+            case "color5":return img`
+a a a a a 
+a c c c a 
+a c a a a 
+a c a a a 
+a a a a a 
+`;
+            case "image10":
+            case "none":return img`
+. . . . . 
+. . . . . 
+. . b . . 
+. . . . . 
+. . . . . 
 `;
         }
         return null;
