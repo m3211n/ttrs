@@ -126,46 +126,6 @@ namespace myImages {
 .....................................................ffffffffffffffffffffffffffffffffffffffffffffffffffffff.....................................................
 ................................................................................................................................................................
 `;
-            case "image2":
-            case "color1":return img`
-2 2 2 2 2 
-2 9 9 9 2 
-2 9 9 2 2 
-2 9 2 2 2 
-2 2 2 2 2 
-`;
-            case "image1":
-            case "color0":return img`
-1 1 1 1 1 
-1 8 8 8 1 
-1 8 8 1 1 
-1 8 1 1 1 
-1 1 1 1 1 
-`;
-            case "image3":
-            case "color2":return img`
-3 3 3 3 3 
-3 a a a 3 
-3 a a 3 3 
-3 a 3 3 3 
-3 3 3 3 3 
-`;
-            case "image4":
-            case "color3":return img`
-4 4 4 4 4 
-4 b b b 4 
-4 b b 4 4 
-4 b 4 4 4 
-4 4 4 4 4 
-`;
-            case "image9":
-            case "txt_hold":return img`
-8 . . 8 . 8 8 8 8 . 8 . . . 8 8 8 8 
-8 . . 8 . 8 . . 8 . 8 . . . . 8 . 8 
-8 8 8 8 . 8 . . 8 . 8 . . . . 8 . 8 
-8 . . 8 . 8 . . 8 . 8 . . . . 8 . 8 
-8 . . 8 . 8 8 8 8 . 8 8 8 . 8 8 8 8 
-`;
             case "image10":
             case "txt_lines":return img`
 8 . . . 8 8 8 . 8 . . . 8 . 8 8 8 . 8 8 8 8 
@@ -210,25 +170,57 @@ namespace myImages {
             case "color4":return img`
 5 5 5 5 5 
 5 c c c 5 
-5 c c 5 5 
 5 c 5 5 5 
+5 5 5 5 5 
 5 5 5 5 5 
 `;
             case "image6":
             case "color5":return img`
 6 6 6 6 6 
 6 d d d 6 
-6 d d 6 6 
 6 d 6 6 6 
+6 6 6 6 6 
 6 6 6 6 6 
 `;
             case "image7":
             case "color6":return img`
 7 7 7 7 7 
 7 e e e 7 
-7 e e 7 7 
 7 e 7 7 7 
 7 7 7 7 7 
+7 7 7 7 7 
+`;
+            case "image2":
+            case "color1":return img`
+2 2 2 2 2 
+2 9 9 9 2 
+2 9 2 2 2 
+2 2 2 2 2 
+2 2 2 2 2 
+`;
+            case "image1":
+            case "color0":return img`
+1 1 1 1 1 
+1 8 8 8 1 
+1 8 1 1 1 
+1 1 1 1 1 
+1 1 1 1 1 
+`;
+            case "image3":
+            case "color2":return img`
+3 3 3 3 3 
+3 a a a 3 
+3 a 3 3 3 
+3 3 3 3 3 
+3 3 3 3 3 
+`;
+            case "image4":
+            case "color3":return img`
+4 4 4 4 4 
+4 b b b 4 
+4 b 4 4 4 
+4 4 4 4 4 
+4 4 4 4 4 
 `;
         }
         return null;

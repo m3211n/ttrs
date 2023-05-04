@@ -24,8 +24,10 @@ class Matrix {
 
     hardDrop() {
         this.clear()
+        score += ((this.t.r_hard_drop - this.t.r) * 2)
         this.t.r = this.t.r_hard_drop
         this.lock()
+        updateStats()
     }
 
     clear() {
@@ -82,8 +84,11 @@ class Matrix {
     }
 
     clearRows() {
+        let lc = 0
         for (let r = 2; r < 22; r++) {
             if (this.colors[r].indexOf(null) == -1) {
+                lc ++
+                lines ++
                 this.colors.removeAt(r)
                 let emptyRow: number[] = []
                 for (let c = 0; c < 10; c++) {
@@ -92,6 +97,29 @@ class Matrix {
                 this.colors.unshift(emptyRow)
                 this.redraw()
             }
+        }
+        if (lc != 0) {
+            switch (lc) {
+                case 1:
+                    score += (100 * level)
+                    break
+                case 2:
+                    score += (300 * level)
+                    break
+                case 3:
+                    score += (500 * level) 
+                    break
+                case 4:
+                    score += (800 * level)
+            }
+
+            // UPDATE LEVEL
+            if (lines >= 10 * level) {
+                levelUp()
+            }
+
+            updateStats()
+
         }
     }
 
@@ -301,19 +329,23 @@ class Matrix {
         let result = false
         let n = cells.length
         let r = 0
-        while (r < n && !result) {
-            let c = 0
-            while (c < n && !result) {
-                if (cells[r][c] != null) {
-                    if ((r + next_r < 0) || (r + next_r > 21) || (typeof this.colors[r + next_r][c + next_c] === "undefined") || (r + next_r <= 21 && this.colors[r + next_r][c + next_c] > 6 && this.colors[r + next_r][c + next_c] < 21)) {
-                        result = true
-                    }  
+        if (next_c == this.t.c && next_r < this.t.r_hard_drop) {
+            return result
+        } else {
+            while (r < n && !result) {
+                let c = 0
+                while (c < n && !result) {
+                    if (cells[r][c] != null) {
+                        if ((r + next_r < 0) || (r + next_r > 21) || (typeof this.colors[r + next_r][c + next_c] === "undefined") || (r + next_r <= 21 && this.colors[r + next_r][c + next_c] > 6 && this.colors[r + next_r][c + next_c] < 21)) {
+                            result = true
+                        }
+                    }
+                    c++
                 }
-                c++
+                r++
             }
-            r++
+            return result
         }
-        return result
     }
 
     lock() {
@@ -395,15 +427,15 @@ class Bag {
             let row_3: Sprite[] = []
             for (let c = 0; c < 4; c ++) {
                 let tmp_sprite = sprites.create(image.create(3, 3))
-                tmp_sprite.setPosition(c * 4 + 114, r * 4 + 17)
+                tmp_sprite.setPosition(c * 4 + 119, r * 4 + 17)
                 row_1.push(tmp_sprite)
 
                 let tmp_sprite_2 = sprites.create(image.create(3, 3))
-                tmp_sprite_2.setPosition(c * 4 + 114, r * 4 + 35)
+                tmp_sprite_2.setPosition(c * 4 + 119, r * 4 + 35)
                 row_2.push(tmp_sprite_2)
 
                 let tmp_sprite_3 = sprites.create(image.create(3, 3))
-                tmp_sprite_3.setPosition(c * 4 + 114, r * 4 + 51)
+                tmp_sprite_3.setPosition(c * 4 + 119, r * 4 + 51)
                 row_3.push(tmp_sprite_3)
             }
             this.preview_1.push(row_1)
@@ -493,38 +525,72 @@ enum Rotation {
 let level: number = 1
 let score: number = 0
 let gravity: number = 1
-
-function levelUp() {
-    level ++
-    gravity = Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
-    clearInterval(tickID)
-    tickID = setInterval(autoMove, 1000 * gravity)
-}
-
-let bg = image.create(160, 128)
-bg.fill(15)
-bg.fillRect(54, 4, 52, 112, 0) // Matrix
-bg.fillRect(111, 14, 18, 54, 0) // Next
-
-scene.setBackgroundImage(bg)
-
-let sScore = textsprite.create("0123456789", 0, 8)
-sScore.setPosition(0 + sScore.width / 2, 0 + sScore.height / 2)
-sScore.setMaxFontHeight(5)
+let lines: number = 0
+let highscore: number = 0
 
 let bag = new Bag()
 let tetrimino = new Tetrimino(bag.deal())
 let matrix = new Matrix(tetrimino)
 
+// -------- UI --------
 
+let bg = image.create(160, 128)
+bg.fillRect(53, 13, 54, 104, 15)          // Matrix
+bg.fillRect(55, 15, 50, 100, 0)          // Matrix
+bg.fillRect(116, 14, 18, 54, 0)         // Next
+scene.setBackgroundImage(bg)
 
-// -------- AUTO DROP --------
+// -------- STATS --------
+
+let sScoreTitle = sprites.create(assets.image`txt_score`)
+let sLevelTitle = sprites.create(assets.image`txt_level`)
+let sLinesTitle = sprites.create(assets.image`txt_lines`)
+let sHighscoreTitle = sprites.create(assets.image`txt_hiscore`)
+
+sScoreTitle.setPosition(18, 18)
+sLevelTitle.setPosition(18, 43)
+sLinesTitle.setPosition(18, 68)
+sHighscoreTitle.setPosition(23, 93)
+
+let sScore = textsprite.create("0", 0, 8)
+let sLevel = textsprite.create("0", 0, 8)
+let sLines = textsprite.create("0", 0, 8)
+let sHighscore = textsprite.create("0", 0, 8)
+
+function updateStats() {
+
+    sScore.setText(score.toString())
+    sScore.setPosition(5 + sScore.width / 2, 22 + sScore.height / 2)
+    sScore.setMaxFontHeight(8)
+
+    sLevel.setText(level.toString())
+    sLevel.setPosition(5 + sLevel.width / 2, 47 + sLevel.height / 2)
+    sLevel.setMaxFontHeight(8)
+
+    sLines.setText(lines.toString())
+    sLines.setPosition(5 + sLines.width / 2, 72 + sLines.height / 2)
+    sLines.setMaxFontHeight(8)
+
+    sHighscore.setText(highscore.toString())
+    sHighscore.setPosition(5 + sHighscore.width / 2, 97 + sHighscore.height / 2)
+    sHighscore.setMaxFontHeight(8)
+
+}
+
+// ---- AUTO DROP / GRAVITY ----
 
 function autoMove() {
     matrix.move(true, 1)
 }
 
 let tickID = setInterval(autoMove, 1000)
+
+function levelUp() {
+    level++
+    gravity = Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
+    clearInterval(tickID)
+    tickID = setInterval(autoMove, 1000 * gravity)
+}
 
 // -------- CONTROLLER --------
 
