@@ -1,29 +1,20 @@
 class Matrix {
-    cells: Sprite[][]
     cells_new: Sprite
     colors: number[][]
     t: Tetrimino
 
     constructor(t: Tetrimino) {
         this.t = t
-        this.cells = []
         this.colors = []
         for (let r = 0; r < 22; r ++) {
-            let row: Sprite[] = []
-            let c_row: number[] = []
+            this.colors.push([])
             for (let c = 0; c < 10; c ++) {
-                let tmp_sprite = sprites.create(image.create(5, 5))
-                tmp_sprite.setPosition(c * 5 + X0, r * 5 + Y0)
-                row.push(tmp_sprite)
-                c_row.push(null)
+                this.colors[r].push(null)
             }
-            this.cells.push(row)
-            this.colors.push(c_row)
-
-            this.cells_new = sprites.create(image.create(this.colors[0].length * 5, this.colors.length * 5))
-            this.cells_new.setPosition(80, 60)
-            this.cells_new.image.fill(0)
         }
+        this.cells_new = sprites.create(image.create(this.colors[0].length * 5, this.colors.length * 5))
+        this.cells_new.setPosition(80, 60)
+        this.cells_new.image.fill(0)
     }
 
     bottomSonar() {
@@ -50,7 +41,6 @@ class Matrix {
     }
 
     hardDrop() {
-        this.clear()
         score += ((this.t.r_hard_drop - this.t.r) * 2)
         this.t.r = this.t.r_hard_drop
         this.t.piece.setPosition(X0 + (this.t.c + 1) * 5, Y0 + (this.t.r + 1) * 5)
@@ -101,11 +91,16 @@ class Matrix {
     }
 
     rotate(cw: boolean) {
-        this.clear()
         // create the rotated copy of the tetrimino
         let n = this.t.cells.length
         let tm = []
-        let tm2 = this.t.cells
+        let tm2 = []
+        for (let r = 0; r < n; r ++) {
+            tm2.push([])
+            for (let c = 0; c < n; c ++) {
+                tm2[r].push(this.t.cells[r][c])
+            }
+        } 
         if (cw) {
             // transpose
             for (let i = 0; i < n; i++) {
@@ -135,8 +130,6 @@ class Matrix {
                 }
             }
         }
-        console.log(tm2)
-        console.log(this.t.cells)
 
         // check if wall kicks are needed
         let canRotate = false
@@ -300,6 +293,7 @@ class Matrix {
                 this.lock()
             }
         }
+        this.t.update()
         this.bottomSonar()
     }
 
@@ -382,7 +376,7 @@ class Tetrimino {
 
     update() {
         let n = this.cells.length
-        this.piece.setImage(image.create(n * 5, n * 5))
+        this.piece.image.fill(0)
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
                 if (this.cells[r][c] != null) {
