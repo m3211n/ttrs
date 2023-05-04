@@ -11,7 +11,7 @@ class Matrix {
             let row: Sprite[] = []
             let c_row: number[] = []
             for (let c = 0; c < 10; c ++) {
-                let tmp_sprite = sprites.create(assets.image`none`)
+                let tmp_sprite = sprites.create(image.create(5, 5))
                 tmp_sprite.setPosition(c * 5 + X0, r * 5 + Y0)
                 row.push(tmp_sprite)
                 c_row.push(null)
@@ -20,6 +20,12 @@ class Matrix {
             this.colors.push(c_row)
         }
         this.respawn()
+    }
+
+    hardDrop() {
+        this.clear()
+        this.t.r = this.t.r_hard_drop
+        this.lock()
     }
 
     clear() {
@@ -34,6 +40,16 @@ class Matrix {
     }
 
     respawn() {
+        // Sonar
+        let bottom = false
+        let r_g = this.t.r
+        while (!bottom) {
+            r_g++
+            bottom = this.checkCollision(r_g, this.t.c, this.t.cells)
+        }
+
+        this.t.r_hard_drop = r_g - 1
+
         let n = this.t.cells.length
         for (let r = 0; r < n; r ++) {
             for (let c = 0; c < n; c ++) {
@@ -42,16 +58,24 @@ class Matrix {
                 }
             }
         }
+        console.log(this.t.r_hard_drop)
         this.redraw()
     }
 
     redraw() {
+        let img: Image
         for (let r = 0; r < 22; r ++) {
             for (let c = 0; c < 10; c ++) {
                 if (this.colors[r][c] != null) {
-                    this.cells[r][c].setImage(colors[this.colors[r][c]])
+                    if (this.colors[r][c] <= 6 ) {
+                        img = colors[this.colors[r][c]]
+                    } else { 
+                        img = image.create(5, 5)
+                        img.fill(this.colors[r][c] - 6)
+                    }
+                    this.cells[r][c].setImage(img)
                 } else {
-                    this.cells[r][c].setImage(assets.image`none`)
+                    this.cells[r][c].setImage(image.create(5,5))
                 }
             }
         }
@@ -72,9 +96,11 @@ class Matrix {
     }
 
     rotate(cw: boolean) {
+        this.clear()
         // create the rotated copy of the tetrimino
         let n = this.t.cells.length
         let tm = []
+        let tm2 = this.t.cells
         if (cw) {
             // transpose
             for (let i = 0; i < n; i++) {
@@ -92,7 +118,7 @@ class Matrix {
         } else {
             // reverse
             for (let i = 0; i < n; i++) {
-                this.t.cells[i].reverse()
+                tm2[i].reverse()
             }
             // transpose
             for (let i = 0; i < n; i++) {
@@ -100,10 +126,12 @@ class Matrix {
             }
             for (let i = 0; i < n; i++) {
                 for (let j = 0; j < n; j++) {
-                    tm[j].push(this.t.cells[i][j])
+                    tm[j].push(tm2[i][j])
                 }
             }
         }
+        console.log(tm2)
+        console.log(this.t.cells)
 
         // check if wall kicks are needed
         let canRotate = false
@@ -116,11 +144,9 @@ class Matrix {
         }
         // if wall kicks not needed
         if (canRotate) {
-            this.clear()
             this.t.cells = tm
-            this.t.r = this.t.r + y_k
+            this.t.r = this.t.r - y_k // minus because kick adjustments are made considering the bottom left corner as 0, 0
             this.t.c = this.t.c + x_k
-            this.respawn()
 
             // update the rotation property
             if (cw) {
@@ -136,15 +162,16 @@ class Matrix {
             } else {
                 if (this.t.rotation == Rotation.Zero) {
                     this.t.rotation = Rotation.Left
-                } else if (this.t.rotation == Rotation.Right) {
-                    this.t.rotation = Rotation.Zero
+                } else if (this.t.rotation == Rotation.Left) {
+                    this.t.rotation = Rotation.Two
                 } else if (this.t.rotation == Rotation.Two) {
                     this.t.rotation = Rotation.Right
                 } else {
-                    this.t.rotation = Rotation.Two
+                    this.t.rotation = Rotation.Zero
                 }
             }
         }
+        this.respawn()
     }
 
     canRotate(testID: number, rot: number, cw: boolean, rotatedCells: number[][]): [boolean, number, number] {
@@ -249,7 +276,7 @@ class Matrix {
                 }
                 break
         }
-        let result = !(this.checkCollision(this.t.r + y_k, this.t.c + x_k, rotatedCells))
+        let result = !(this.checkCollision(this.t.r - y_k, this.t.c + x_k, rotatedCells))
         return [
             result, y_k, x_k
         ]
@@ -278,7 +305,7 @@ class Matrix {
             let c = 0
             while (c < n && !result) {
                 if (cells[r][c] != null) {
-                    if ((r + next_r <= 21 && this.colors[r + next_r][c + next_c] > 6) || (r + next_r > 21) || (typeof this.colors[r + next_r][c + next_c] === "undefined")) {
+                    if ((r + next_r < 0) || (r + next_r > 21) || (typeof this.colors[r + next_r][c + next_c] === "undefined") || (r + next_r <= 21 && this.colors[r + next_r][c + next_c] > 6 && this.colors[r + next_r][c + next_c] < 21)) {
                         result = true
                     }  
                 }
@@ -290,6 +317,10 @@ class Matrix {
     }
 
     lock() {
+        if (this.t.r == 0) {
+            game.over(false)
+        }
+
         let n = this.t.cells.length
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
@@ -298,9 +329,10 @@ class Matrix {
                 }
             }
         }
+        this.clearRows()
         this.redraw()
         this.t = new Tetrimino(bag.deal())
-        console.log("Locked!")
+        this.respawn()
     }
 }
 
@@ -310,6 +342,7 @@ class Tetrimino {
     shapeID: number 
     r: number
     c: number
+    r_hard_drop: number
 
     constructor(shape: number) {
         this.shapeID = shape
@@ -335,12 +368,16 @@ class Tetrimino {
 }
 
 class Bag {
-    preview: Sprite[][]
+    preview_1: Sprite[][]
+    preview_2: Sprite[][]
+    preview_3: Sprite[][]
 
     contents: number[]
 
     constructor () {
-        this.preview = []
+        this.preview_1 = []
+        this.preview_2 = []
+        this.preview_3 = []
         this.contents = []
         let full = false
         while (!full) {
@@ -353,19 +390,31 @@ class Bag {
             }
         }
         for (let r = 0; r < 4; r ++) {
-            let row: Sprite[] = []
+            let row_1: Sprite[] = []
+            let row_2: Sprite[] = []
+            let row_3: Sprite[] = []
             for (let c = 0; c < 4; c ++) {
-                let tmp_sprite = sprites.create(assets.image`none`)
-                tmp_sprite.setPosition(c * 5 + 100, r * 5 + 8)
-                row.push(tmp_sprite)
+                let tmp_sprite = sprites.create(image.create(3, 3))
+                tmp_sprite.setPosition(c * 4 + 114, r * 4 + 17)
+                row_1.push(tmp_sprite)
+
+                let tmp_sprite_2 = sprites.create(image.create(3, 3))
+                tmp_sprite_2.setPosition(c * 4 + 114, r * 4 + 35)
+                row_2.push(tmp_sprite_2)
+
+                let tmp_sprite_3 = sprites.create(image.create(3, 3))
+                tmp_sprite_3.setPosition(c * 4 + 114, r * 4 + 51)
+                row_3.push(tmp_sprite_3)
             }
-            this.preview.push(row)
+            this.preview_1.push(row_1)
+            this.preview_2.push(row_2)
+            this.preview_3.push(row_3)
         }
     }
     
     deal (): number {
         let next = this.contents.shift()
-        if (this.contents.length < 1) {
+        if (this.contents.length < 3) {
             let full = false
             while (!full) {
                 let rnd = Math.randomRange(0, 6)
@@ -377,13 +426,33 @@ class Bag {
                 }
             }
         }
-        let tPreview = new Tetrimino(this.contents[0])
+        let tPreview_1 = new Tetrimino(this.contents[0])
+        let tPreview_2 = new Tetrimino(this.contents[1])
+        let tPreview_3 = new Tetrimino(this.contents[2])
         for (let r = 0; r < 4; r ++) {
             for (let c = 0; c < 4; c ++) {
-                if (c < tPreview.cells.length && r < tPreview.cells.length && tPreview.cells[r][c] != null) {
-                    this.preview[r][c].setImage(colors[tPreview.cells[r][c]])
+                if (c < tPreview_1.cells.length && r < tPreview_1.cells.length && tPreview_1.cells[r][c] != null) {
+                    let img = image.create(4, 4)
+                    img.fill(tPreview_1.shapeID + 1)
+                    this.preview_1[r][c].setImage(img)
                 } else {
-                    this.preview[r][c].setImage(assets.image`none`)
+                    this.preview_1[r][c].setImage(image.create(4, 4))
+                }
+
+                if (c < tPreview_2.cells.length && r < tPreview_2.cells.length && tPreview_2.cells[r][c] != null) {
+                    let img = image.create(4, 4)
+                    img.fill(tPreview_2.shapeID + 1)
+                    this.preview_2[r][c].setImage(img)
+                } else {
+                    this.preview_2[r][c].setImage(image.create(4, 4))
+                }
+
+                if (c < tPreview_3.cells.length && r < tPreview_3.cells.length && tPreview_3.cells[r][c] != null) {
+                    let img = image.create(4, 4)
+                    img.fill(tPreview_3.shapeID + 1)
+                    this.preview_3[r][c].setImage(img)
+                } else {
+                    this.preview_3[r][c].setImage(image.create(4, 4))
                 }
             }
         }
@@ -408,17 +477,10 @@ const colors: Image[] = [
     assets.image`color3`,
     assets.image`color4`,
     assets.image`color5`,
-    assets.image`color6`,
-    assets.image`locked_color0`,
-    assets.image`locked_color1`,
-    assets.image`locked_color2`,
-    assets.image`locked_color3`,
-    assets.image`locked_color4`,
-    assets.image`locked_color5`,
-    assets.image`locked_color6`
+    assets.image`color6`
 ]
 
-const X0 = 36
+const X0 = 58
 const Y0 = 8
 
 enum Rotation {
@@ -432,10 +494,6 @@ let level: number = 1
 let score: number = 0
 let gravity: number = 1
 
-function autoMove() {
-    matrix.move(true, 1)
-}
-
 function levelUp() {
     level ++
     gravity = Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
@@ -443,13 +501,32 @@ function levelUp() {
     tickID = setInterval(autoMove, 1000 * gravity)
 }
 
-scene.setBackgroundImage(assets.image`game`)
+let bg = image.create(160, 128)
+bg.fill(15)
+bg.fillRect(54, 4, 52, 112, 0) // Matrix
+bg.fillRect(111, 14, 18, 54, 0) // Next
+
+scene.setBackgroundImage(bg)
+
+let sScore = textsprite.create("0123456789", 0, 8)
+sScore.setPosition(0 + sScore.width / 2, 0 + sScore.height / 2)
+sScore.setMaxFontHeight(5)
 
 let bag = new Bag()
 let tetrimino = new Tetrimino(bag.deal())
 let matrix = new Matrix(tetrimino)
 
+
+
+// -------- AUTO DROP --------
+
+function autoMove() {
+    matrix.move(true, 1)
+}
+
 let tickID = setInterval(autoMove, 1000)
+
+// -------- CONTROLLER --------
 
 controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
     matrix.rotate(true)
@@ -481,4 +558,8 @@ controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
 
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.move(false, 1)
+})
+
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    matrix.hardDrop()
 })
