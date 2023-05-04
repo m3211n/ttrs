@@ -128,7 +128,12 @@ class Matrix {
         // create the rotated copy of the tetrimino
         let n = this.t.cells.length
         let tm = []
-        let tm2 = this.t.cells
+        let tm2 = []
+
+        for (let row of this.t.cells) {
+            tm2.push(row)
+        }
+        
         if (cw) {
             // transpose
             for (let i = 0; i < n; i++) {
