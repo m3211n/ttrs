@@ -492,6 +492,26 @@ class Bag {
     }
 }
 
+function updateStats() {
+
+    sScore.setText(score.toString())
+    sScore.setPosition(5 + sScore.width / 2, 22 + sScore.height / 2)
+    sScore.setMaxFontHeight(8)
+
+    sLevel.setText(level.toString())
+    sLevel.setPosition(5 + sLevel.width / 2, 47 + sLevel.height / 2)
+    sLevel.setMaxFontHeight(8)
+
+    sLines.setText(lines.toString())
+    sLines.setPosition(5 + sLines.width / 2, 72 + sLines.height / 2)
+    sLines.setMaxFontHeight(8)
+
+    sHighscore.setText(highscore.toString())
+    sHighscore.setPosition(5 + sHighscore.width / 2, 97 + sHighscore.height / 2)
+    sHighscore.setMaxFontHeight(8)
+
+}
+
 const shapes = [
     [4, 5, 6, 7], 
     [0, 3, 4, 5], 
@@ -557,25 +577,7 @@ let sLevel = textsprite.create("0", 0, 8)
 let sLines = textsprite.create("0", 0, 8)
 let sHighscore = textsprite.create("0", 0, 8)
 
-function updateStats() {
-
-    sScore.setText(score.toString())
-    sScore.setPosition(5 + sScore.width / 2, 22 + sScore.height / 2)
-    sScore.setMaxFontHeight(8)
-
-    sLevel.setText(level.toString())
-    sLevel.setPosition(5 + sLevel.width / 2, 47 + sLevel.height / 2)
-    sLevel.setMaxFontHeight(8)
-
-    sLines.setText(lines.toString())
-    sLines.setPosition(5 + sLines.width / 2, 72 + sLines.height / 2)
-    sLines.setMaxFontHeight(8)
-
-    sHighscore.setText(highscore.toString())
-    sHighscore.setPosition(5 + sHighscore.width / 2, 97 + sHighscore.height / 2)
-    sHighscore.setMaxFontHeight(8)
-
-}
+updateStats()
 
 // ---- AUTO DROP / GRAVITY ----
 
