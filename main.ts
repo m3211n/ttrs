@@ -91,6 +91,7 @@ class TtmLayer {
             this.tright = tright
             this.s.image.fill(0)
             let n = this.tTiles.length
+            console.log("width: " + this.twidth + " height: " + this.theight)
             for (let row = 0; row < n; row++) {
                 for (let col = 0; col < n; col++) {
                     if (this.tTiles[row][col] != null) {
@@ -114,7 +115,7 @@ class TtmLayer {
     }
 
     getFloorHeight() {
-        this.floorheight = Math.randomRange(0, 6)
+        this.floorheight = 0
     }
 
     harddrop() {
