@@ -78,24 +78,24 @@ namespace myImages {
             case "image6":
             case "color_5":return img`
 a a a a a 
-a 1 1 1 a 
-a 1 a a a 
+a 3 3 3 a 
+a 3 a a a 
 a a a a a 
 a a a a a 
 `;
             case "image7":
             case "color_6":return img`
 2 2 2 2 2 
-2 3 3 3 2 
-2 3 2 2 2 
+2 1 1 1 2 
+2 1 2 2 2 
 2 2 2 2 2 
 2 2 2 2 2 
 `;
             case "image2":
             case "color_1":return img`
 8 8 8 8 8 
-8 9 9 9 8 
-8 9 8 8 8 
+8 6 6 6 8 
+8 6 8 8 8 
 8 8 8 8 8 
 8 8 8 8 8 
 `;
