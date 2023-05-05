@@ -1,4 +1,29 @@
 {
+    "image10": {
+        "data": "hwQWAAUAAAAREQEAAAABAAAAAQAAAAAAAQABABERAQABAAEAAAAAABERAQAQAAAAAAEAAAAQAAAREQEAAAAAABERAQABAQEAAQEBAAAAAAARAQEAAQEBAAEBAQABEQEA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "txt_lines"
+    },
+    "image11": {
+        "data": "hwQXAAUAAAARAQEAAQEBAAEBAQABEQEAAAAAABERAQABAAEAAQABAAAAAAAREQEAAQABAAEAAQAREQEAAAAAAAEAAAAREQEAAQEAAAERAAARAQEAAAAAABERAQABAQEAAQEBAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "txt_score"
+    },
+    "image12": {
+        "data": "hwQhAAUAAAAREQEAAAEAAAABAAAREQEAAAAAABERAQAAAAAAAAEAAAABAAAAAAAAEQEBAAEBAQABAQEAAREBAAAAAAAREQEAAQABAAEAAQAAAAAAEREBAAEAAQABAAEAEREBAAAAAAABAAAAEREBAAEBAAABEQAAEQEBAAAAAAAREQEAAQEBAAEBAQA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "txt_hiscore"
+    },
+    "image13": {
+        "data": "hwQVAAUAAAAREQEAEAAAAAABAAAAEAAAEREBAAAAAAAREQEAAQEBAAEBAQAAAAAAAQABABAQAAAAAQAAEBAAAAEAAQAAAAAAAQAAAAEAAAAREQEAAQAAAAEAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "txt_next"
+    },
+    "image14": {
+        "data": "hwQVAAUAAAAREQEAAAABAAAAAQAAAAAAEREBAAEBAQABAQEAAAAAABEBAAAAEAAAAAABAAAQAAARAQAAAAAAABERAQABAQEAAQEBAAAAAAAREQEAAAABAAAAAQA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "txt_level"
+    },
     "image1": {
         "data": "hwQFAAUAAACZmQkAGZEJABmZCQAZmQkAmZkJAA==",
         "mimeType": "image/x-mkcd-f4",
@@ -33,31 +58,6 @@
         "data": "hwQFAAUAAACIiAgAmIkIAJiICACYiAgAiIgIAA==",
         "mimeType": "image/x-mkcd-f4",
         "displayName": "color_1"
-    },
-    "image10": {
-        "data": "hwQVAAcAAADMzMwMAAAADAAAAAwAAAAADAAADMzMzAwMAAAMAAAAAMzMzAzAAAAAAAwAAADAAADMzMwMAAAAAMzMzAwMDAAMDAAADAAAAADMDAAMDAwADAzMzAw=",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "txt_lines"
-    },
-    "image11": {
-        "data": "hwQWAAcAAADMDAAMDAwADAzMzAwAAAAAzMzMDAwAAAwMAAAMAAAAAMzMzAwMAAAMDAAADMzMzAwAAAAADAAAAMzMzAwMDAAADMwMAMwMwAwAAAAAzMzMDAwMAAwMAAAM",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "txt_score"
-    },
-    "image12": {
-        "data": "hwQhAAcAAADMzMwMAAwAAAAMAADMzMwMAAAAAMzMzAwAAAAAAAwAAAAMAAAAAAAAzAwADAwMAAwMzMwMAAAAAMzMzAwMAAAMDAAADAAAAADMzMwMDAAADAwAAAzMzMwMAAAAAAwAAADMzMwMDAwAAAzMDADMDMAMAAAAAMzMzAwMDAAMDAAADAAAAAA=",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "txt_hiscore"
-    },
-    "image13": {
-        "data": "hwQdAAcAAADMzMwMwAAAAAAMAAAAwAAAzMzMDAAAAADMzMwMDAwADAwAAAwAAAAAzADADAAMDAAAwAAAAAwMAMwAwAwAAAAADAAAAAwAAADMzMwMDAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "txt_next"
-    },
-    "image14": {
-        "data": "hwQVAAcAAADMzMwMAAAADAAAAAwAAAAAzMzMDAwMAAwMAAAMAAAAAMzMDAAAAMAAAAAADAAAwADMzAwAAAAAAMzMzAwMDAAMDAAADAAAAADMzMwMAAAADAAAAAw=",
-        "mimeType": "image/x-mkcd-f4",
-        "displayName": "txt_level"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",

@@ -3,6 +3,46 @@ namespace myImages {
 
     helpers._registerFactory("image", function(name: string) {
         switch(helpers.stringTrim(name)) {
+            case "image10":
+            case "txt_lines":return img`
+1 . . . 1 1 1 . 1 . . . 1 . 1 1 1 . 1 1 1 1 
+1 . . . . 1 . . 1 1 . . 1 . 1 . . . 1 . . . 
+1 . . . . 1 . . 1 . 1 . 1 . 1 1 1 . 1 1 1 1 
+1 . . . . 1 . . 1 . . 1 1 . 1 . . . . . . 1 
+1 1 1 . 1 1 1 . 1 . . . 1 . 1 1 1 . 1 1 1 1 
+`;
+            case "image11":
+            case "txt_score":return img`
+1 1 1 1 . 1 1 1 . 1 1 1 1 . 1 1 1 1 1 . 1 1 1 
+1 . . . . 1 . . . 1 . . 1 . . 1 . . 1 . 1 . . 
+1 1 1 1 . 1 . . . 1 . . 1 . . 1 1 1 1 . 1 1 1 
+. . . 1 . 1 . . . 1 . . 1 . . 1 . 1 . . 1 . . 
+1 1 1 1 . 1 1 1 . 1 1 1 1 . . 1 . . 1 . 1 1 1 
+`;
+            case "image12":
+            case "txt_hiscore":return img`
+1 . . 1 . 1 . . . . 1 1 1 1 . 1 1 1 . 1 1 1 1 . 1 1 1 1 1 . 1 1 1 
+1 . . 1 . 1 . . . . 1 . . . . 1 . . . 1 . . 1 . . 1 . . 1 . 1 . . 
+1 1 1 1 . 1 . 1 1 . 1 1 1 1 . 1 . . . 1 . . 1 . . 1 1 1 1 . 1 1 1 
+1 . . 1 . 1 . . . . . . . 1 . 1 . . . 1 . . 1 . . 1 . 1 . . 1 . . 
+1 . . 1 . 1 . . . . 1 1 1 1 . 1 1 1 . 1 1 1 1 . . 1 . . 1 . 1 1 1 
+`;
+            case "image13":
+            case "txt_next":return img`
+1 . . . 1 . 1 1 1 . 1 . . . 1 . 1 1 1 1 1 
+1 1 . . 1 . 1 . . . . 1 . 1 . . . . 1 . . 
+1 . 1 . 1 . 1 1 1 . . . 1 . . . . . 1 . . 
+1 . . 1 1 . 1 . . . . 1 . 1 . . . . 1 . . 
+1 . . . 1 . 1 1 1 . 1 . . . 1 . . . 1 . . 
+`;
+            case "image14":
+            case "txt_level":return img`
+1 . . . 1 1 1 . 1 . . . 1 . 1 1 1 . 1 . . 
+1 . . . 1 . . . 1 . . . 1 . 1 . . . 1 . . 
+1 . . . 1 1 1 . 1 . . . 1 . 1 1 1 . 1 . . 
+1 . . . 1 . . . . 1 . 1 . . 1 . . . 1 . . 
+1 1 1 . 1 1 1 . . . 1 . . . 1 1 1 . 1 1 1 
+`;
             case "image1":
             case "color_0":return img`
 9 9 9 9 9 
@@ -58,56 +98,6 @@ a a a a a
 8 9 8 8 8 
 8 8 8 8 8 
 8 8 8 8 8 
-`;
-            case "image10":
-            case "txt_lines":return img`
-c . . . c c c . c . . . c . c c c . c c c 
-c . . . . c . . c c . . c . c . . . c . . 
-c . . . . c . . c . c . c . c c . . c c c 
-c . . . . c . . c . . c c . c . . . . . c 
-c . . . . c . . c . . . c . c . . . . . c 
-c . . . . c . . c . . . c . c . . . . . c 
-c c c . c c c . c . . . c . c c c . c c c 
-`;
-            case "image11":
-            case "txt_score":return img`
-c c c . c c c . c c c c . c c c c c . c c c 
-c . . . c . . . c . . c . . c . . c . c . . 
-c c c . c . . . c . . c . . c c c c . c c . 
-. . c . c . . . c . . c . . c . c . . c . . 
-. . c . c . . . c . . c . . c . c . . c . . 
-. . c . c . . . c . . c . . c . . c . c . . 
-c c c . c c c . c c c c . . c . . c . c c c 
-`;
-            case "image12":
-            case "txt_hiscore":return img`
-c . . c . c . . . . c c c . c c c . c c c c . c c c c c . c c c . 
-c . . c . c . . . . c . . . c . . . c . . c . . c . . c . c . . . 
-c c c c . c . c c . c c c . c . . . c . . c . . c c c c . c c . . 
-c . . c . c . . . . . . c . c . . . c . . c . . c . c . . c . . . 
-c . . c . c . . . . . . c . c . . . c . . c . . c . c . . c . . . 
-c . . c . c . . . . . . c . c . . . c . . c . . c . . c . c . . . 
-c . . c . c . . . . c c c . c c c . c c c c . . c . . c . c c c . 
-`;
-            case "image13":
-            case "txt_next":return img`
-c . . . c . c c c . c . . . c . c c c c c . . . . . . . . 
-c c . . c . c . . . c . . . c . . . c . . . . . . . . . . 
-c . c . c . c c . . . c . c . . . . c . . . . . . . . . . 
-c . . c c . c . . . . . c . . . . . c . . . . . . . . . . 
-c . . . c . c . . . . c . c . . . . c . . . . . . . . . . 
-c . . . c . c . . . c . . . c . . . c . . . . . . . . . . 
-c . . . c . c c c . c . . . c . . . c . . . . . . . . . . 
-`;
-            case "image14":
-            case "txt_level":return img`
-c . . . c c c . c . . . c . c c c . c . . 
-c . . . c . . . c . . . c . c . . . c . . 
-c . . . c c . . c . . . c . c c . . c . . 
-c . . . c . . . c . . . c . c . . . c . . 
-c . . . c . . . c . . . c . c . . . c . . 
-c . . . c . . . . c . c . . c . . . c . . 
-c c c . c c c . . . c . . . c c c . c c c 
 `;
         }
         return null;
