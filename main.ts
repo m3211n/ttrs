@@ -1,3 +1,58 @@
+class Bag {
+    private preview: Sprite[]
+    private contents: number[]
+
+    constructor() {
+        let full = false
+        this.contents = []
+        this.fill()
+
+        this.preview = []
+
+        for (let n = 0; n < NEXT_PIECES; n ++) {
+            let max = (this.contents[n] == 0) ? 4 : ((this.contents[n] == 3) ? 2 : 3)
+            this.preview.push(sprites.create(image.create(4 * NEXT_CELL_SIZE, 4 * NEXT_CELL_SIZE)))
+            this.preview[n].setPosition(134, 43 + n * (this.preview[0].height + NEXT_CELL_SIZE))
+        }
+    }
+
+    private updateQueue() {
+        for (let n = 0; n < NEXT_PIECES; n ++) {
+            this.preview[n].image.fill(0)
+            let piece = buildPieceMatrix(this.contents[n], 0)
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece.length; c++) {
+                    if (piece[r][c] != null) {
+                        this.preview[n].image.fillRect(c * NEXT_CELL_SIZE, r * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, tetris_colors[this.contents[n]])
+                    }
+                }
+            }
+        }
+    }
+
+    private fill() {
+        let full = false
+        while (!full) {
+            let rnd = Math.randomRange(0, 6)
+            if (this.contents.indexOf(rnd) == -1) {
+                this.contents.push(rnd)
+            }
+            if (this.contents.length == 7) {
+                full = true
+            }
+        }
+    }
+
+    deal(): number {
+        let next = this.contents.shift()
+        if (this.contents.length < 3) {
+            this.fill()
+        }
+        this.updateQueue()
+        return next
+    }
+}
+
 class Tetrimino {
     colors: number[][]
     piece: Sprite
