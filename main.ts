@@ -1,3 +1,52 @@
+class Bag {
+    private preview: Sprite
+    private contents: number[]
+
+    constructor() {
+        let full = false
+        this.contents = []
+        this.fill()
+        this.preview = sprites.create(image.create(4 * NEXT_CELL_SIZE, 15 * NEXT_CELL_SIZE))
+        this.preview.setPosition(134, 73)
+    }
+
+    private fill() {
+        let full = false
+        while (!full) {
+            let rnd = Math.randomRange(0, 6)
+            if (this.contents.indexOf(rnd) == -1) {
+                this.contents.push(rnd)
+            }
+            if (this.contents.length == 7) {
+                full = true
+            }
+        }
+    }
+
+    private updateQueue() {
+        this.preview.image.fill(0)
+        for (let n = 0; n < NEXT_PIECES; n++) {
+            let piece = buildPieceMatrix(this.contents[n], 0)
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece.length; c++) {
+                    if (piece[r][c] != null) {
+                        this.preview.image.fillRect(c * NEXT_CELL_SIZE, (r + n * 5) * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, tetris_colors[this.contents[n]])
+                    }
+                }
+            }
+        }
+    }
+
+    deal(): number {
+        let next = this.contents.shift()
+        if (this.contents.length < NEXT_PIECES) {
+            this.fill()
+        }
+        this.updateQueue()
+        return next
+    }
+}
+
 class Tetrimino {
     colors: number[][]
     piece: Sprite
@@ -12,10 +61,10 @@ class Tetrimino {
 
     constructor(shape: number) {
         this.shapeID = shape
-        this.colors = this.build()
         this.rotation = 0
-        this.h = 0 
-        this.r = (shape == 0) ? -1 : 0
+        this.colors = this.build()
+        this.h = 0
+        this.r = 0
         this.c = (shape == 3) ? 4 : 3
         this.piece = sprites.create(image.create(this.colors.length * CELL_SIZE, this.colors.length * CELL_SIZE))
         this.ghost_piece = sprites.create(image.create(this.colors.length * CELL_SIZE, this.colors.length * CELL_SIZE))
