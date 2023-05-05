@@ -1,16 +1,13 @@
 class Bag {
-    private preview: Sprite[]
+    private preview: Sprite
     private contents: number[]
 
     constructor() {
         let full = false
         this.contents = []
         this.fill()
-        this.preview = []
-        for (let n = 0; n < NEXT_PIECES; n++) {
-            this.preview.push(sprites.create(image.create(4 * NEXT_CELL_SIZE, 4 * NEXT_CELL_SIZE)))
-            this.preview[n].setPosition(134, 43 + n * (this.preview[0].height + NEXT_CELL_SIZE))
-        }
+        this.preview = sprites.create(image.create(4 * NEXT_CELL_SIZE, 15 * NEXT_CELL_SIZE))
+        this.preview.setPosition(134, 73)
     }
 
     private fill() {
@@ -27,13 +24,13 @@ class Bag {
     }
 
     private updateQueue() {
+        this.preview.image.fill(0)
         for (let n = 0; n < NEXT_PIECES; n++) {
-            this.preview[n].image.fill(0)
             let piece = buildPieceMatrix(this.contents[n], 0)
             for (let r = 0; r < piece.length; r++) {
                 for (let c = 0; c < piece.length; c++) {
-                    if (piece[r][c] != 0) {
-                        this.preview[n].image.fillRect(c * NEXT_CELL_SIZE, r * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, tetris_colors[this.contents[n] + 1])
+                    if (piece[r][c] != null) {
+                        this.preview.image.fillRect(c * NEXT_CELL_SIZE, (r + n * 5) * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, tetris_colors[this.contents[n]])
                     }
                 }
             }
@@ -50,6 +47,118 @@ class Bag {
     }
 }
 
+class TtmLayer {
+    s: Sprite
+    tshape: number
+    trotation: number
+    tTiles: number[][]
+    tcol: number
+    trow: number
+    tbottom: number
+    tright: number
+    theight: number
+    twidth: number
+    floorheight: number
+
+    constructor() {
+        this.s = sprites.create(image.create(50, 110))
+        this.s.setPosition(80, 60)
+        this.spawn(bag.deal(), 0, null, null)
+    }
+
+    spawn(shape: number, rotation: number, row: number, col: number){
+        let tshape = shape
+        let trotation = rotation
+        let trow = (row != null) ? row : 0
+        let tcol = (col != null) ? col : (tshape == 3 ? 4 : 3)
+        let twidth = (tshape == 0 ? 4 : (tshape == 3 ? 2 : 3))
+        let theight = heights[tshape][trotation]
+        let tbottom = MATRIX_HEIGHT - trow - theight
+        let tright = MATRIX_WIDTH - tcol - twidth
+
+        if (tcol >= 0 && tbottom >= 0 && tright >= 0) {
+            if (this.tshape != tshape || this.trotation != trotation) {
+                this.tshape = tshape
+                this.trotation = trotation
+                this.tTiles = buildPieceMatrix(this.tshape, this.trotation)
+            }
+            this.getFloorHeight()
+            this.trow = trow
+            this.tcol = tcol
+            this.twidth = twidth
+            this.theight = theight
+            this.tbottom = tbottom
+            this.tright = tright
+            this.s.image.fill(0)
+            let n = this.tTiles.length
+            for (let row = 0; row < n; row++) {
+                for (let col = 0; col < n; col++) {
+                    if (this.tTiles[row][col] != null) {
+                        let x = (this.tcol + col) * CELL_SIZE
+                        let y = (this.trow + row) * CELL_SIZE
+                        let y_g = (this.tbottom + row - this.floorheight) * CELL_SIZE
+                        this.s.image.fillRect(x, y, CELL_SIZE, CELL_SIZE, tetris_colors[this.tshape])
+                        this.s.image.fillRect(x, y_g, CELL_SIZE, CELL_SIZE, 12)
+                        this.s.image.fillRect(x + 1, y_g + 1, CELL_SIZE - 2, CELL_SIZE - 2, 0)
+                    }
+                }
+            }
+        }
+    }
+
+    move(h: number, v: number) {
+        let r = this.trow + h
+        let c = this.tcol + v
+        this.spawn(this.tshape, this.trotation, r, c)
+        console.log(this.trow + ", " + this.tcol)
+    }
+
+    getFloorHeight() {
+        this.floorheight = Math.randomRange(0, 6)
+    }
+
+    harddrop() {
+        this.spawn(this.tshape, this.trotation, this.tbottom - this.floorheight, this.tcol)
+    }
+}
+
+class Matrix {
+    s: Sprite
+    colors: number[][]
+    x0: number
+    y0: number
+
+    constructor() {
+        this.colors = []
+        for (let r = 0; r < 22; r++) {
+            this.colors.push([])
+            for (let c = 0; c < 10; c++) {
+                this.colors[r].push(0)
+            }
+        }
+        this.s = sprites.create(image.create(this.colors[0].length * CELL_SIZE, this.colors.length * CELL_SIZE))
+        this.s.setPosition(80, 60)
+        this.s.image.fill(0)
+    }
+
+    redraw() {
+        this.s.image.fill(0)
+        for (let r = 0; r < 22; r++) {
+            for (let c = 0; c < 10; c++) {
+                if (this.colors[r][c] != 0) {
+                    this.s.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, tetris_colors[this.colors[r][c]])
+                }
+            }
+        }
+    }
+
+    lock() {
+    }
+}
+
+
+/*
+
 class Tetrimino {
     s: Sprite
     colors: number[][]
@@ -60,7 +169,7 @@ class Tetrimino {
     h: number
     r_hard_drop: number
 
-    private ghost_piece: Sprite
+    private g: Sprite
 
     constructor() {
         this.shapeID = bag.deal()
@@ -69,31 +178,38 @@ class Tetrimino {
         this.c = (this.shapeID == 3) ? 4 : 3
         let size = (this.shapeID == 3) ? 2 : ((this.shapeID == 0) ? 4 : 3)
         this.s = sprites.create(image.create(size * CELL_SIZE, size * CELL_SIZE))
-        this.ghost_piece = sprites.create(image.create(size * CELL_SIZE, size * CELL_SIZE))
+        this.g = sprites.create(image.create(size * CELL_SIZE, size * CELL_SIZE))
         this.updateSprite()
         this.locateAt(this.r, this.c)
     }
 
-    build(r?: number): number[][] {
+    build(r: number): number[][] {
         let rotation = r ? r : this.rotation
-        this.h = heights[this.shapeID][this.rotation]
         return buildPieceMatrix(this.shapeID, rotation)
     }
 
     updateSprite() {
-        this.colors = this.build()
+        this.colors = this.build(this.rotation)
+        this.h = heights[this.shapeID][this.rotation]
         let n = this.colors.length
         this.s.image.fill(0)
-        this.ghost_piece.image.fill(0)
+        this.g.image.fill(0)
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
                 if (this.colors[r][c] != 0) {
                     this.s.image.drawImage(tiles_images[this.shapeID], c * CELL_SIZE, r * CELL_SIZE)
-                    this.ghost_piece.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, 12)
-                    this.ghost_piece.image.fillRect(c * CELL_SIZE + 1, r * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2, 0)
+                    this.g.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, 12)
+                    this.g.image.fillRect(c * CELL_SIZE + 1, r * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2, 0)
                 }
             }
         }
+    }
+
+    locateAt(r: number, c: number) {
+        this.r = r
+        this.c = c
+        this.s.setPosition(x0 + (this.c * CELL_SIZE + this.s.width / 2), y0 + (this.r * CELL_SIZE + this.s.height / 2))
+        this.g.setPosition(x0 + (this.c * CELL_SIZE + this.g.width / 2), y0 + (this.r_hard_drop * CELL_SIZE + this.g.height / 2))
     }
 
     bottomSonar() {
@@ -115,24 +231,17 @@ class Tetrimino {
         this.r_hard_drop = lowest_row - this.h
     }
 
-    locateAt(r: number, c: number) {
-        this.r = r
-        this.c = c
-        this.bottomSonar()
-        this.s.setPosition(x0 + (this.c * CELL_SIZE + this.s.width / 2), y0 + (this.r * CELL_SIZE + this.s.height / 2))
-        this.ghost_piece.setPosition(x0 + (this.c * CELL_SIZE + this.ghost_piece.width / 2), y0 + (this.r_hard_drop * CELL_SIZE + this.ghost_piece.height / 2))
-    }
 
     respawn() {
         this.s.destroy()
-        this.ghost_piece.destroy()
+        this.g.destroy()
         this.shapeID = bag.deal()
         this.rotation = Rotation.Zero
         this.r = (this.shapeID == 0) ? -1 : 0
         this.c = (this.shapeID == 3) ? 4 : 3
-        this.colors = this.build()
+        this.colors = this.build(this.rotation)
         this.s = sprites.create(image.create(this.colors.length * CELL_SIZE, this.colors.length * CELL_SIZE))
-        this.ghost_piece = sprites.create(image.create(this.colors.length * CELL_SIZE, this.colors.length * CELL_SIZE))
+        this.g = sprites.create(image.create(this.colors.length * CELL_SIZE, this.colors.length * CELL_SIZE))
         this.updateSprite()
         this.locateAt(this.r, this.c)
     }
@@ -189,183 +298,6 @@ class Tetrimino {
 
 }
 
-class Matrix {
-    s: Sprite
-    colors: number[][]
-    t: Tetrimino
-    x0: number
-    y0: number
-
-    constructor() {
-        this.colors = []
-        for (let r = 0; r < 22; r++) {
-            this.colors.push([])
-            for (let c = 0; c < 10; c++) {
-                this.colors[r].push(0)
-            }
-        }
-        this.s = sprites.create(image.create(this.colors[0].length * CELL_SIZE, this.colors.length * CELL_SIZE))
-        this.s.setPosition(80, 60)
-        this.s.image.fill(0)
-    }
-
-    redraw() {
-        this.s.image.fill(0)
-        for (let r = 0; r < 22; r++) {
-            for (let c = 0; c < 10; c++) {
-                if (this.colors[r][c] != 0) {
-                    this.s.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, tetris_colors[this.colors[r][c]])
-                }
-            }
-        }
-    }
-
-    clearRows() {
-        let lc = 0
-        for (let r = 2; r < 22; r++) {
-            if (this.colors[r].indexOf(null) == -1) {
-                lc++
-                lines++
-                this.colors.removeAt(r)
-                let emptyRow: number[] = []
-                for (let c = 0; c < 10; c++) {
-                    emptyRow.push(null)
-                }
-                this.colors.unshift(emptyRow)
-                this.redraw()
-            }
-        }
-        if (lc != 0) {
-            switch (lc) {
-                case 1: score += (100 * level); break
-                case 2: score += (300 * level); break
-                case 3: score += (500 * level); break
-                case 4: score += (800 * level)
-            }
-            // UPDATE LEVEL
-            if (lines >= 10 * level) {
-                levelUp()
-            }
-            updateStats()
-        }
-    }
-
-    lock() {
-    }
-}
-
-/*
-
-function wallKickData(shapeID: number, testID: number, rotation: number): [number, number] {
-
-    const z_r = (this.t.rotation == Rotation.Zero && next == Rotation.Right)
-    const r_z = (this.t.rotation == Rotation.Right && next == Rotation.Zero)
-    const r_t = (this.t.rotation == Rotation.Right && next == Rotation.Two)
-    const t_r = (this.t.rotation == Rotation.Two && next == Rotation.Right)
-    const t_l = (this.t.rotation == Rotation.Two && next == Rotation.Left)
-    const l_t = (this.t.rotation == Rotation.Left && next == Rotation.Two)
-    const l_z = (this.t.rotation == Rotation.Left && next == Rotation.Zero)
-    const z_l = (this.t.rotation == Rotation.Zero && next == Rotation.Left)
-
-    let x_k = 0
-    let y_k = 0
-
-    switch (testID) {
-        case 1:
-            break
-        case 2:
-            if (this.t.shapeID == 0) {
-                if (z_r || l_z) {
-                    x_k = -2;
-                } else if (r_z || t_l) {
-                    x_k = 2;
-                } else if (r_t || z_l) {
-                    x_k = -1;
-                } else {
-                    x_k = 1;
-                }
-            } else {
-                if (z_r || t_r || l_t || l_z) {
-                    x_k = -1
-                } else {
-                    x_k = 1
-                }
-            }
-            break
-        case 3:
-            if (this.t.shapeID == 0) {
-                if (z_r || l_t) {
-                    x_k = 1
-                } else if (r_z || t_l) {
-                    x_k = -1
-                } else if (r_t || z_l) {
-                    x_k = 2;
-                } else {
-                    x_k = -2;
-                }
-            } else {
-                if (z_r || t_r) {
-                    x_k = -1; y_k = 1
-                } else if (this.t.rotation == Rotation.Right) {
-                    x_k = 1; y_k = -1
-                } else if (t_l || z_l) {
-                    x_k = 1; y_k = 1
-                } else {
-                    x_k = -1; y_k = -1
-                }
-            }
-            break
-        case 4:
-            if (this.t.shapeID == 0) {
-                if (z_r || l_t) {
-                    x_k = -2; y_k = -1
-                } else if (r_z || t_l) {
-                    x_k = 2; y_k = 1
-                } else if (r_t || z_l) {
-                    x_k = 2; y_k = -1
-                } else {
-                    x_k = -2; y_k = 1
-                }
-            } else {
-                if (z_r || t_r || t_l || z_l) {
-                    y_k = -2
-                } else {
-                    y_k = 2
-                }
-            }
-            break
-        case 5:
-            if (this.t.shapeID == 0) {
-                if (z_r || l_t) {
-                    x_k = 1; y_k = 2
-                } else if (r_z || t_l) {
-                    x_k = -1; y_k = -2
-                } else if (r_t || z_l) {
-                    x_k = 2; y_k = -1
-                } else {
-                    x_k = -2; y_k = 1
-                }
-            } else {
-                if (z_r || t_r) {
-                    x_k = -1; y_k = -2
-                } else if (r_z || r_t) {
-                    x_k = 1; y_k = 2
-                } else if (t_l || z_l) {
-                    x_k = 1; y_k = -2
-                } else {
-                    x_k = -1; y_k = 2
-                }
-            }
-            break
-    }
-    let result = this.checkCollision(this.t.r - y_k, this.t.c + x_k, this.t.build(next))
-    return [
-        result, y_k, x_k
-    ]
-}
-
-*/
-
 function lock() {
     if (tetrimino.r == 0) {
         game.over(false)
@@ -379,7 +311,7 @@ function lock() {
             }
         }
     }
-    matrix.clearRows()
+    clearRows()
     matrix.redraw()
     tetrimino.respawn()
     tetrimino.updateSprite()
@@ -412,6 +344,8 @@ function checkCollision(next_r: number, next_c: number, cells?: number[][]): boo
         return result
     }
 }
+
+*/
 
 function updateStats() {
 
@@ -446,17 +380,17 @@ function buildPieceMatrix(shapeID: number, rotation: number): number[][] {
         matrix.push([])
         for (let c = 0; c < max; c++) {
             if (shapes[shapeID][rotation][i] % max == c && Math.floor(shapes[shapeID][rotation][i] / max) == r) {
-                matrix[r].push(shapeID + 1)
+                matrix[r].push(shapeID)
                 i++
             } else {
-                matrix[r].push(0)
+                matrix[r].push(null)
             }
         }
     }
     return matrix
 }
 
-const tetris_colors = [0, 9, 8, 4, 5, 7, 10, 2]
+const tetris_colors = [9, 8, 4, 5, 7, 10, 2]
 
 const tiles_images: Image[] = [
     assets.image`color_0`,
@@ -531,16 +465,18 @@ let y0 = 60 - MATRIX_HEIGHT * CELL_SIZE / 2
 
 let bag = new Bag()
 let matrix = new Matrix()
-let tetrimino = new Tetrimino()
+//let tetrimino = new Tetrimino()
 
-// -------- UI --------
+let ttmlayer = new TtmLayer
+
+// -------- UI - MATRIX --------
 
 let bg = image.create(160, 128)
-bg.fillRect(53, 13, 54, 104, 11)          // Matrix
-bg.fillRect(55, 15, 50, 100, 0)
+bg.fillRect(53, 3, 54, 114, 11)          // Matrix
+bg.fillRect(55, 5, 50, 110, 0)
 scene.setBackgroundImage(bg)
 
-// -------- STATS --------
+// -------- UI - STATS --------
 
 let sScoreTitle = sprites.create(assets.image`txt_score`)
 let sLevelTitle = sprites.create(assets.image`txt_level`)
@@ -568,55 +504,93 @@ sHighscore.setMaxFontHeight(STAT_FONT_SIZE)
 
 updateStats()
 
-// ---- AUTO DROP / GRAVITY ----
+// ---- GAME STATS ----
 
 function autoMove() {
-    tetrimino.locateAt(tetrimino.r + 1, tetrimino.c)
+    //    tetrimino.locateAt(tetrimino.r + 1, tetrimino.c)
+}
+
+function clearRows() {
+    let lc = 0
+    for (let r = 2; r < MATRIX_HEIGHT; r++) {
+        if (matrix.colors[r].indexOf(null) == -1) {
+            lc++
+            lines++
+            matrix.colors.removeAt(r)
+            let emptyRow: number[] = []
+            for (let c = 0; c < 10; c++) {
+                emptyRow.push(null)
+            }
+            matrix.colors.unshift(emptyRow)
+            matrix.redraw()
+        }
+    }
+    if (lc != 0) {
+        switch (lc) {
+            case 1: score += (100 * level); break
+            case 2: score += (300 * level); break
+            case 3: score += (500 * level); break
+            case 4: score += (800 * level)
+        }
+        // UPDATE LEVEL
+        if (lines >= 10 * level) {
+            level++
+            gravity = Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
+            clearInterval(tickID)
+            tickID = setInterval(autoMove, 1000 * gravity)
+        }
+        updateStats()
+    }
 }
 
 let tickID = setInterval(autoMove, 1000)
 
-function levelUp() {
-    level++
-    gravity = Math.pow(0.8 - ((level - 1) * 0.007), level - 1)
-    clearInterval(tickID)
-    tickID = setInterval(autoMove, 1000 * gravity)
-}
-
 // -------- CONTROLLER --------
 
+
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.rotate(true)
+///    tetrimino.rotate(true)
 })
 
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.rotate(false)
+//    tetrimino.rotate(false)
 })
 
 controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
-    tetrimino.drop(false)
+//    tetrimino.drop(false)
+ttmlayer.move(1, 0)
+
 })
 
 controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
-    tetrimino.strafe(-1)
+//    tetrimino.strafe(-1)
+    ttmlayer.move(0, -1)
+
 })
 
 controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
-    tetrimino.strafe(1)
+//    tetrimino.strafe(1)
+    ttmlayer.move(0, 1)
+
 })
 
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.drop(false)
+//    tetrimino.drop(false)
+    ttmlayer.move(1, 0)
+
 })
 
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.strafe(-1)
+//    tetrimino.strafe(-1)
+    ttmlayer.move(0, -1)
 })
 
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.strafe(1)
+//    tetrimino.strafe(1)
+    ttmlayer.move(0, 1)
 })
 
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    tetrimino.drop(true)
+//    tetrimino.drop(true)
+ttmlayer.harddrop()
 })
