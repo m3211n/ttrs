@@ -119,6 +119,19 @@ class TtmLayer {
 
     harddrop() {
         this.spawn(this.tshape, this.trotation, this.tbottom - this.floorheight, this.tcol)
+        this.lock()
+    }
+
+    lock() {
+        for (let row = 0; row < this.twidth; row++) {
+            for (let col = 0; col < this.theight; col++) {
+                if (this.tTiles[row][col] !== null) {
+                    matrix.colors[this.trow + row][this.tcol + col] = this.tTiles[row][col]
+                }
+            }
+        }
+        matrix.redraw()
+        this.spawn(bag.deal(), 0, null, null)
     }
 }
 
