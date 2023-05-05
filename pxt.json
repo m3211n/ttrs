@@ -10,8 +10,7 @@
         "README.md",
         "assets.json",
         "images.g.jres",
-        "images.g.ts",
-        "bag.ts"
+        "images.g.ts"
     ],
     "testFiles": [
         "test.ts"

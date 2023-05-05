@@ -1,7 +1,158 @@
+class Bag {
+    preview: Sprite[]
+    contents: number[]
+
+    constructor() {
+        let full = false
+        this.contents = []
+        while (!full) {
+            let rnd = Math.randomRange(0, 6)
+            if (this.contents.indexOf(rnd) == -1) {
+                this.contents.push(rnd)
+            }
+            if (this.contents.length == 7) {
+                full = true
+            }
+        }
+
+        this.preview = []
+        for (let n = 0; n < 3; n++) {
+            let max = (this.contents[n] == 0) ? 4 : ((this.contents[n] == 3) ? 2 : 3)
+            this.preview.push(sprites.create(image.create(4 * NEXT_CELL_SIZE, 4 * NEXT_CELL_SIZE)))
+            this.preview[n].setPosition(134, 43 + n * (this.preview[0].height + NEXT_CELL_SIZE))
+            let i = 0
+            for (let r = 0; r < max; r++) {
+                for (let c = 0; c < max; c++) {
+                    if (shapes[this.contents[n]][i] % max == c && Math.floor(shapes[this.contents[n]][i] / max) == r) {
+                        this.preview[n].image.fillRect(c * NEXT_CELL_SIZE, r * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, this.contents[n] + 1)
+                        i++
+                    }
+                }
+            }
+        }
+    }
+
+    deal(): number {
+        let next = this.contents.shift()
+        if (this.contents.length < 3) {
+            let full = false
+            while (!full) {
+                let rnd = Math.randomRange(0, 6)
+                if (this.contents.indexOf(rnd) == -1) {
+                    this.contents.push(rnd)
+                }
+                if (this.contents.length == 7) {
+                    full = true
+                }
+            }
+        }
+
+        for (let n = 0; n < 3; n++) {
+            let max = (this.contents[n] == 0) ? 4 : ((this.contents[n] == 3) ? 2 : 3)
+            this.preview[n].image.fill(0)
+            let i = 0
+            for (let r = 0; r < max; r++) {
+                for (let c = 0; c < max; c++) {
+                    if (shapes[this.contents[n]][i] % max == c && Math.floor(shapes[this.contents[n]][i] / max) == r) {
+                        this.preview[n].image.fillRect(c * NEXT_CELL_SIZE, r * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, this.contents[n] + 1)
+                        i++
+                    }
+                }
+            }
+        }
+        return next
+    }
+}
+
+class Tetrimino {
+    colors: number[][]
+    piece: Sprite
+    rotation: number
+    shapeID: number
+    r: number
+    c: number
+    r_hard_drop: number
+
+    private ghost_piece: Sprite
+
+    constructor(shape: number) {
+        this.shapeID = shape
+        this.colors = []
+        this.rotation = 0 
+        this.r = (shape == 0) ? -1 : 0
+        this.c = (shape == 3) ? 4 : 3
+        let max = (shape == 0) ? 4 : ((shape == 3) ? 2 : 3)
+        let i = 0
+        for (let r = 0; r < max; r++) {
+            this.colors.push([])
+            for (let c = 0; c < max; c++) {
+                if (shapes[shape][i] % max == c && Math.floor(shapes[shape][i] / max) == r) {
+                    this.colors[r].push(shape)
+                    i++
+                } else {
+                    this.colors[r].push(null)
+                }
+            }
+        }
+        this.piece = sprites.create(image.create(max * CELL_SIZE, max * CELL_SIZE))
+        this.ghost_piece = sprites.create(image.create(max * CELL_SIZE, max * CELL_SIZE))
+    }
+
+    update() {
+        let n = this.colors.length
+        
+        if (this.piece.image.width != n * CELL_SIZE) {
+            this.piece.destroy()
+            this.ghost_piece.destroy()
+            this.piece = sprites.create(image.create(n * CELL_SIZE, n * CELL_SIZE))
+            this.ghost_piece = sprites.create(image.create(n * CELL_SIZE, n * CELL_SIZE))
+        }
+
+        this.piece.image.fill(0)
+        this.ghost_piece.image.fill(0)
+        for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n; c++) {
+                if (this.colors[r][c] != null) {
+                    this.piece.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, this.shapeID + 1)
+                    this.piece.image.drawLine(c * CELL_SIZE + 1, r * CELL_SIZE + 1, c * CELL_SIZE + 3, r * CELL_SIZE + 1, this.shapeID + 8)
+                    this.piece.image.drawLine(c * CELL_SIZE + 1, r * CELL_SIZE + 1, c * CELL_SIZE + 1, r * CELL_SIZE + 2, this.shapeID + 8)
+                    this.ghost_piece.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, 15)
+                    this.ghost_piece.image.fillRect(c * CELL_SIZE + 1, r * CELL_SIZE + 1, CELL_SIZE - 2, CELL_SIZE - 2, 0)
+                }
+            }
+        }
+        this.piece.setPosition(x0 + (this.c * CELL_SIZE + this.piece.width / 2), y0 + (this.r * CELL_SIZE + this.piece.height / 2))
+        this.ghost_piece.setPosition(x0 + (this.c * CELL_SIZE + this.ghost_piece.width / 2), y0 + (this.r_hard_drop * CELL_SIZE + this.ghost_piece.height / 2))
+    }
+
+    reuse(shape: number) {
+        this.shapeID = shape
+        this.colors = []
+        this.rotation = Rotation.Zero
+        this.r = (shape == 0) ? -1 : 0
+        this.c = (shape == 3) ? 4 : 3
+        let max = (shape == 0) ? 4 : ((shape == 3) ? 2 : 3)
+        let i = 0
+        for (let r = 0; r < max; r++) {
+            this.colors.push([])
+            for (let c = 0; c < max; c++) {
+                if (shapes[shape][i] % max == c && Math.floor(shapes[shape][i] / max) == r) {
+                    this.colors[r].push(shape)
+                    i++
+                } else {
+                    this.colors[r].push(null)
+                }
+            }
+        }
+    }
+}
+
 class Matrix {
-    cells_new: Sprite
+    s: Sprite
     colors: number[][]
     t: Tetrimino
+    x0: number
+    y0: number
 
     constructor(t: Tetrimino) {
         this.t = t
@@ -12,29 +163,39 @@ class Matrix {
                 this.colors[r].push(null)
             }
         }
-        this.cells_new = sprites.create(image.create(this.colors[0].length * 5, this.colors.length * 5))
-        this.cells_new.setPosition(80, 60)
-        this.cells_new.image.fill(0)
+        this.s = sprites.create(image.create(this.colors[0].length * CELL_SIZE, this.colors.length * CELL_SIZE))
+        this.s.setPosition(80, 60)
+        this.s.image.fill(0)
+        this.bottomSonar()
+        this.t.update()
     }
 
     bottomSonar() {
         // Bottom sonar
-        let bottom = false
-        let r_g = this.t.r
-        while (!bottom) {
-            r_g++
-            bottom = this.checkCollision(r_g, this.t.c, this.t.cells)
+        let lowest_row = this.colors.length - 1
+        for (let c = 0; c < this.t.colors.length; c ++) {
+            let occupied = false
+            let r = this.t.r
+            while (!occupied && r < lowest_row) {
+                if (this.colors[r][c + this.t.c] != null) {
+                    occupied = true
+                } else {
+                    r++
+                }
+            }
+            if (r < lowest_row) {
+                lowest_row = r
+            }
         }
-
-        this.t.r_hard_drop = r_g - 1
+        this.t.r_hard_drop = lowest_row
     }
 
     redraw() {
-        this.cells_new.image.fill(0)
+        this.s.image.fill(0)
         for (let r = 0; r < 22; r++) {
             for (let c = 0; c < 10; c++) {
                 if (this.colors[r][c] != null) {
-                    this.cells_new.image.fillRect(c * 5, r * 5, 5, 5, this.colors[r][c] + 1)
+                    this.s.image.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE, this.colors[r][c] + 1)
                 }
             }
         }
@@ -43,13 +204,10 @@ class Matrix {
     hardDrop() {
         score += ((this.t.r_hard_drop - this.t.r) * 2)
         this.t.r = this.t.r_hard_drop
-        this.t.piece.setPosition(X0 + (this.t.c + 1) * 5, Y0 + (this.t.r + 1) * 5)
+        this.bottomSonar()
+        this.t.update()
         this.lock()
         updateStats()
-    }
-
-    clear() {
-        this.t.piece.setImage(image.create(this.t.cells.length * 5, this.t.cells.length * 5))
     }
 
     clearRows() {
@@ -69,17 +227,10 @@ class Matrix {
         }
         if (lc != 0) {
             switch (lc) {
-                case 1:
-                    score += (100 * level)
-                    break
-                case 2:
-                    score += (300 * level)
-                    break
-                case 3:
-                    score += (500 * level) 
-                    break
-                case 4:
-                    score += (800 * level)
+                case 1: score += (100 * level); break
+                case 2: score += (300 * level); break
+                case 3: score += (500 * level); break
+                case 4: score += (800 * level)
             }
 
             // UPDATE LEVEL
@@ -91,86 +242,66 @@ class Matrix {
     }
 
     rotate(cw: boolean) {
-        // create the rotated copy of the tetrimino
-        let n = this.t.cells.length
-        let tm = []
-        let tm2 = []
-        for (let r = 0; r < n; r ++) {
-            tm2.push([])
-            for (let c = 0; c < n; c ++) {
-                tm2[r].push(this.t.cells[r][c])
-            }
-        } 
-        if (cw) {
-            // transpose
-            for (let i = 0; i < n; i++) {
-                tm.push([])
-            }
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    tm[j].push(this.t.cells[i][j])
+        if (this.t.shapeID != 3) {
+            // create the rotated copy of the tetrimino
+            let n = this.t.colors.length
+            let tm = []
+            let tm2 = []
+            for (let r = 0; r < n; r++) {
+                tm2.push([])
+                for (let c = 0; c < n; c++) {
+                    tm2[r].push(this.t.colors[r][c])
                 }
             }
-            // reverse
-            for (let i = 0; i < n; i++) {
-                tm[i].reverse()
-            }
-        } else {
-            // reverse
-            for (let i = 0; i < n; i++) {
-                tm2[i].reverse()
-            }
-            // transpose
-            for (let i = 0; i < n; i++) {
-                tm.push([])
-            }
-            for (let i = 0; i < n; i++) {
-                for (let j = 0; j < n; j++) {
-                    tm[j].push(tm2[i][j])
-                }
-            }
-        }
-
-        // check if wall kicks are needed
-        let canRotate = false
-        let x_k = 0
-        let y_k = 0
-        let testID = 1
-        while (!canRotate && testID <= 5) {
-            [canRotate, y_k, x_k] = this.canRotate(testID, this.t.rotation, cw, tm)
-            testID ++
-        }
-        // if wall kicks not needed
-        if (canRotate) {
-            this.t.cells = tm
-            this.t.r = this.t.r - y_k // minus because kick adjustments are made considering the bottom left corner as 0, 0
-            this.t.c = this.t.c + x_k
-            
-            // update the rotation property
             if (cw) {
-                if (this.t.rotation == Rotation.Zero) { 
-                    this.t.rotation = Rotation.Right 
-                } else if (this.t.rotation == Rotation.Right) {
-                    this.t.rotation = Rotation.Two
-                } else if (this.t.rotation == Rotation.Two) {
-                    this.t.rotation = Rotation.Left
-                } else {
-                    this.t.rotation = Rotation.Zero
+                // transpose
+                for (let i = 0; i < n; i++) {
+                    tm.push([])
+                }
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        tm[j].push(this.t.colors[i][j])
+                    }
+                }
+                // reverse
+                for (let i = 0; i < n; i++) {
+                    tm[i].reverse()
                 }
             } else {
-                if (this.t.rotation == Rotation.Zero) {
-                    this.t.rotation = Rotation.Left
-                } else if (this.t.rotation == Rotation.Left) {
-                    this.t.rotation = Rotation.Two
-                } else if (this.t.rotation == Rotation.Two) {
-                    this.t.rotation = Rotation.Right
-                } else {
-                    this.t.rotation = Rotation.Zero
+                // reverse
+                for (let i = 0; i < n; i++) {
+                    tm2[i].reverse()
+                }
+                // transpose
+                for (let i = 0; i < n; i++) {
+                    tm.push([])
+                }
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        tm[j].push(tm2[i][j])
+                    }
                 }
             }
+
+            // check if wall kicks are needed
+            let canRotate = false
+            let x_k = 0
+            let y_k = 0
+            let testID = 1
+            while (!canRotate && testID <= 5) {
+                [canRotate, y_k, x_k] = this.canRotate(testID, this.t.rotation, cw, tm)
+                testID++
+            }
+            if (canRotate) {
+                this.t.colors = tm
+                this.t.r = this.t.r - y_k // minus because kick adjustments are made considering the bottom left corner as 0, 0
+                this.t.c = this.t.c + x_k
+                // update the rotation property
+                this.t.rotation = cw ? ((this.t.rotation == 3) ? 0 : this.t.rotation + 1) : ((this.t.rotation == 0) ? 3 : this.t.rotation - 1)
+                this.bottomSonar()
+                this.t.update()
+            }
         }
-        this.t.update()
-        this.bottomSonar()
     }
 
     canRotate(testID: number, rot: number, cw: boolean, rotatedCells: number[][]): [boolean, number, number] {
@@ -251,7 +382,7 @@ class Matrix {
                     }
                 }
                 break
-            case 5:
+            case CELL_SIZE:
                 if (this.t.shapeID == 0) {
                     if (z_r || l_t) {
                         x_k = 1; y_k = 2
@@ -281,29 +412,35 @@ class Matrix {
         ]
     }
 
-    move(vert: boolean, inc: number) {
-        let next_r = vert ? this.t.r + inc : this.t.r
-        let next_c = vert ? this.t.c : this.t.c + inc
-        if (!this.checkCollision(next_r, next_c, this.t.cells)) {
+    move(inc_r: number, inc_c: number) {
+        let next_r = this.t.r + inc_r
+        let next_c = this.t.c + inc_c
+        if (!this.checkCollision(next_r, next_c)) {
             this.t.r = next_r
             this.t.c = next_c
-            this.t.piece.setPosition(X0 + (this.t.c + 1) * 5, Y0 + (this.t.r + 1) * 5)
         } else {
-            if (vert) {
+            if (this.t.r == this.t.r_hard_drop) {
                 this.lock()
             }
         }
+        if (inc_c != 0) {
+            this.bottomSonar()
+        }
         this.t.update()
-        this.bottomSonar()
     }
 
-    checkCollision(next_r: number, next_c: number, cells: number[][]): boolean {
-        let result = false
-        let n = cells.length
-        let r = 0
-        if (next_c == this.t.c && next_r < this.t.r_hard_drop) {
-            return result
+    checkCollision(next_r: number, next_c: number, cells? : number[][]): boolean {
+        if (!cells && next_c == this.t.c && next_r < this.t.r_hard_drop) {
+            return false
         } else {
+            if (!cells) {
+                cells = this.t.colors
+            }
+
+            let result = false
+            let n = cells.length
+            let r = 0
+
             while (r < n && !result) {
                 let c = 0
                 while (c < n && !result) {
@@ -323,75 +460,22 @@ class Matrix {
     lock() {
         if (this.t.r == 0) {
             game.over(false)
+            clearInterval(tickID)
         }
-
-        let n = this.t.cells.length
+        let n = this.t.colors.length
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
-                if (this.t.cells[r][c] != null) {
-                    this.colors[r + this.t.r][c + this.t.c] = this.t.cells[r][c]
+                if (this.t.colors[r][c] != null) {
+                    this.colors[r + this.t.r][c + this.t.c] = this.t.colors[r][c]
                 }
             }
         }
         this.clearRows()
         this.redraw()
-        this.t.piece.destroy()
-        this.t = new Tetrimino(bag.deal())
+        this.t.reuse(bag.deal())
+        this.bottomSonar()
         this.t.update()
     }
-}
-
-class Tetrimino {
-    cells: number[][]
-    piece: Sprite
-    rotation: number
-    shapeID: number 
-    r: number
-    c: number
-    r_hard_drop: number
-
-    constructor(shape: number) {
-        this.shapeID = shape
-        this.cells = []
-        this.rotation = Rotation.Zero
-        this.r = (shape == 0) ? -1 : 0
-        this.c = (shape == 3) ? 4 : 3 
-        let max = (shape == 0) ? 4 : ((shape == 3) ? 2 : 3)
-        let i = 0
-        for (let r = 0; r < max; r ++) {
-            let row: number[] = []
-            for (let c = 0; c < max; c ++) {
-                if (shapes[shape][i] % max == c && Math.floor(shapes[shape][i] / max) == r) {
-                    row.push(shape)
-                    i++
-                } else {
-                    row.push(null)
-                }
-            }
-            this.cells.push(row)
-        }
-        this.piece = sprites.create(image.create(max * 5, max * 5))
-        this.piece.setPosition(X0 + (this.c + 1) * 5, Y0 + (this.r + 1) * 5)
-    }
-
-    update() {
-        let n = this.cells.length
-        this.piece.image.fill(0)
-        for (let r = 0; r < n; r++) {
-            for (let c = 0; c < n; c++) {
-                if (this.cells[r][c] != null) {
-                    this.piece.image.fillRect(c * 5, r * 5, 5, 5, this.shapeID + 1)
-                    this.piece.image.drawLine(c * 5 + 1, r * 5 + 1, c * 5 + 3, r * 5 + 1, this.shapeID + 8)
-                    this.piece.image.drawLine(c * 5 + 1, r * 5 + 1, c * 5 + 1, r * 5 + 2, this.shapeID + 8)
-                }
-            }
-        }
-    }
-
-    setPosition(x: number, y: number) {
-
-    }
-
 }
 
 
@@ -426,19 +510,6 @@ const shapes = [
     [0, 1, 4, 5]
 ]
 
-const colors: Image[] = [
-    assets.image`color0`,
-    assets.image`color1`,
-    assets.image`color2`,
-    assets.image`color3`,
-    assets.image`color4`,
-    assets.image`color5`,
-    assets.image`color6`
-]
-
-const X0 = 58
-const Y0 = 8
-
 enum Rotation {
     Zero = 0,
     Right = 1,
@@ -452,6 +523,14 @@ let gravity: number = 1
 let lines: number = 0
 let highscore: number = 0
 
+const MATRIX_WIDTH = 10
+const MATRIX_HEIGHT = 22
+const CELL_SIZE = 5
+const NEXT_CELL_SIZE = 5
+
+let x0 =  80 - MATRIX_WIDTH * CELL_SIZE / 2
+let y0 = 60 - MATRIX_HEIGHT * CELL_SIZE / 2
+
 let bag = new Bag()
 let tetrimino = new Tetrimino(bag.deal())
 let matrix = new Matrix(tetrimino)
@@ -460,8 +539,7 @@ let matrix = new Matrix(tetrimino)
 
 let bg = image.create(160, 128)
 bg.fillRect(53, 13, 54, 104, 15)          // Matrix
-bg.fillRect(55, 15, 50, 100, 0)          // Matrix
-bg.fillRect(116, 14, 18, 54, 0)         // Next
+bg.fillRect(55, 15, 50, 100, 0)
 scene.setBackgroundImage(bg)
 
 // -------- STATS --------
@@ -470,11 +548,13 @@ let sScoreTitle = sprites.create(assets.image`txt_score`)
 let sLevelTitle = sprites.create(assets.image`txt_level`)
 let sLinesTitle = sprites.create(assets.image`txt_lines`)
 let sHighscoreTitle = sprites.create(assets.image`txt_hiscore`)
+let sNextTitle = sprites.create(assets.image`txt_next`)
 
 sScoreTitle.setPosition(18, 18)
 sLevelTitle.setPosition(18, 43)
 sLinesTitle.setPosition(18, 68)
 sHighscoreTitle.setPosition(23, 93)
+sNextTitle.setPosition(134, 18)
 
 let sScore = textsprite.create("0", 0, 8)
 let sLevel = textsprite.create("0", 0, 8)
@@ -486,7 +566,7 @@ updateStats()
 // ---- AUTO DROP / GRAVITY ----
 
 function autoMove() {
-    matrix.move(true, 1)
+    matrix.move(1, 0)
 }
 
 let tickID = setInterval(autoMove, 1000)
@@ -509,29 +589,32 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 
 controller.down.onEvent(ControllerButtonEvent.Repeated, function() {
-    matrix.move(true, 1)
+    matrix.move(1, 0)
 })
 
 controller.left.onEvent(ControllerButtonEvent.Repeated, function () {
-    matrix.move(false, -1)
+    matrix.move(0, -1)
 })
 
 controller.right.onEvent(ControllerButtonEvent.Repeated, function () {
-    matrix.move(false, 1)
+    matrix.move(0, 1)
 })
 
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    matrix.move(true, 1)
+    matrix.move(1, 0)
 })
 
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    matrix.move(false, -1)
+    matrix.move(0, -1)
 })
 
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    matrix.move(false, 1)
+    matrix.move(0, 1)
 })
 
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.hardDrop()
 })
+
+let i = img``
+i.r
