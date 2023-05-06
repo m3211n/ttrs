@@ -63,23 +63,23 @@ class Tetrimino {
     constructor(shape: number) {
         this.shapeID = shape
         this.rotation = 0
-        this.bottom = MATRIX_HEIGHT - this.h
         this.w = (this.shapeID == 0) ? 4 : (this.shapeID == 3 ? 2 : 3)
-        this.h = 0
+        this.h = heights[this.shapeID][this.r]
+        this.bottom = MATRIX_HEIGHT - this.h
         this.r = 0
         this.c = (shape == 3) ? 4 : 3
         this.piece = sprites.create(image.create(this.w * CELL_SIZE, this.w * CELL_SIZE))
         this.ghost_piece = sprites.create(image.create(this.w * CELL_SIZE, this.w * CELL_SIZE))
     }
 
-    build(r?:number): number[][] {
+    build(r?: number): number[][] {
         let rotation = r ? r : this.rotation
         this.h = heights[this.shapeID][this.rotation]
         return buildPieceMatrix(this.shapeID, rotation)
     }
 
     update() {
-        this.colors = this.build()
+        this.colors = this.build(this.rotation)
         let n = this.colors.length
 
         if (this.piece.image.width != n * CELL_SIZE) {
@@ -122,9 +122,9 @@ class Matrix {
     constructor(t: Tetrimino) {
         this.t = t
         this.colors = []
-        for (let r = 0; r < 22; r ++) {
+        for (let r = 0; r < 22; r++) {
             this.colors.push([])
-            for (let c = 0; c < 10; c ++) {
+            for (let c = 0; c < 10; c++) {
                 this.colors[r].push(null)
             }
         }
@@ -136,26 +136,27 @@ class Matrix {
     }
 
     bottomSonar() {
-        
 
-/*
-        // Bottom sonar
-        let lowest_row = this.colors.length
-        for (let c = 0; c < this.t.colors.length; c ++) {
-            let occupied = false
-            let r = this.t.r
-            while (!occupied && r < lowest_row) {
-                if (this.colors[r][c + this.t.c] != null) {
-                    occupied = true
-                } else {
-                    r++
-                }
-            }
-            if (r < lowest_row) {
-                lowest_row = r
-            }
-        }
-        this.t.bottom = lowest_row - this.t.h */
+
+        /*
+                // Bottom sonar
+                let lowest_row = this.colors.length
+                for (let c = 0; c < this.t.colors.length; c ++) {
+                    let occupied = false
+                    let r = this.t.r
+                    while (!occupied && r < lowest_row) {
+                        if (this.colors[r][c + this.t.c] != null) {
+                            occupied = true
+                        } else {
+                            r++
+                        }
+                    }
+                    if (r < lowest_row) {
+                        lowest_row = r
+                    } 
+        */
+
+
     }
 
     redraw() {
@@ -182,8 +183,8 @@ class Matrix {
         let lc = 0
         for (let r = 2; r < 22; r++) {
             if (this.colors[r].indexOf(null) == -1) {
-                lc ++
-                lines ++
+                lc++
+                lines++
                 this.colors.removeAt(r)
                 let emptyRow: number[] = []
                 for (let c = 0; c < 10; c++) {
@@ -236,14 +237,14 @@ class Matrix {
 
     canRotate(testID: number, next: number): [boolean, number, number] {
 
-        const z_r = (this.t.rotation == Rotation.Zero   && next == Rotation.Right)
-        const r_z = (this.t.rotation == Rotation.Right  && next == Rotation.Zero)
-        const r_t = (this.t.rotation == Rotation.Right  && next == Rotation.Two)
-        const t_r = (this.t.rotation == Rotation.Two    && next == Rotation.Right)
-        const t_l = (this.t.rotation == Rotation.Two    && next == Rotation.Left)
-        const l_t = (this.t.rotation == Rotation.Left   && next == Rotation.Two)
-        const l_z = (this.t.rotation == Rotation.Left   && next == Rotation.Zero)
-        const z_l = (this.t.rotation == Rotation.Zero   && next == Rotation.Left)
+        const z_r = (this.t.rotation == Rotation.Zero && next == Rotation.Right)
+        const r_z = (this.t.rotation == Rotation.Right && next == Rotation.Zero)
+        const r_t = (this.t.rotation == Rotation.Right && next == Rotation.Two)
+        const t_r = (this.t.rotation == Rotation.Two && next == Rotation.Right)
+        const t_l = (this.t.rotation == Rotation.Two && next == Rotation.Left)
+        const l_t = (this.t.rotation == Rotation.Left && next == Rotation.Two)
+        const l_z = (this.t.rotation == Rotation.Left && next == Rotation.Zero)
+        const z_l = (this.t.rotation == Rotation.Zero && next == Rotation.Left)
 
         let x_k = 0
         let y_k = 0
@@ -253,8 +254,8 @@ class Matrix {
                 break
             case 2:
                 if (this.t.shapeID == 0) {
-                    if (z_r || l_z) { 
-                        x_k = -2; 
+                    if (z_r || l_z) {
+                        x_k = -2;
                     } else if (r_z || t_l) {
                         x_k = 2;
                     } else if (r_t || z_l) {
@@ -359,7 +360,7 @@ class Matrix {
         this.t.update()
     }
 
-    checkCollision(next_r: number, next_c: number, cells? : number[][]): boolean {
+    checkCollision(next_r: number, next_c: number, cells?: number[][]): boolean {
         if (!cells && next_c == this.t.c && next_r < this.t.bottom) {
             return false
         } else {
@@ -419,22 +420,22 @@ function updateStats() {
 
     sLines.setText(lines.toString())
     sLines.setPosition(5 + sLines.width / 2, 72 + sLines.height / 2)
-    
+
     sHighscore.setText(highscore.toString())
     sHighscore.setPosition(5 + sHighscore.width / 2, 97 + sHighscore.height / 2)
-    
+
 }
 
-function buildPieceMatrix (shapeID: number, rotation: number) :number[][] {
+function buildPieceMatrix(shapeID: number, rotation: number): number[][] {
     let matrix: number[][] = []
     const shapes = [
-        [[4, 5, 6, 7], [4, 5, 6, 7], [4, 5, 6, 7], [4, 5, 6, 7]],
-        [[0, 3, 4, 5], [0, 3, 4, 5], [0, 3, 4, 5], [0, 3, 4, 5]],
-        [[2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5]],
+        [[4, 5, 6, 7], [2, 6, 10, 14], [8, 9, 10, 11], [1, 5, 9, 13]],
+        [[0, 3, 4, 5], [1, 2, 4, 7], [3, 4, 5, 8], [1, 4, 6, 7]],
+        [[2, 3, 4, 5], [1, 4, 7, 8], [3, 4, 5, 6], [0, 1, 4, 7]],
         [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
-        [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
-        [[1, 3, 4, 5], [1, 3, 4, 5], [1, 3, 4, 5], [1, 3, 4, 5]],
-        [[0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5]]
+        [[1, 2, 3, 4], [1, 4, 5, 8], [4, 5, 6, 7], [3, 4, 5, 7]],
+        [[1, 3, 4, 5], [1, 4, 5 ,7], [3, 4, 5, 7], [1, 3, 4, 7]],
+        [[0, 1, 4, 5], [2, 4, 5, 7], [3, 4, 7 ,8], [1, 3 ,4 ,6]]
     ]
     let max = (shapeID == 0) ? 4 : ((shapeID == 3) ? 2 : 3)
     let i = 0
@@ -471,6 +472,35 @@ enum Rotation {
     Left = 3
 }
 
+const wall_kick_data = [
+    [[-1, 0], [-1, 1], [0, -2], [-1, -2]],  // 0 -> R
+    [[1, 0], [1, 1], [0, -2], [1, -2]],     // 0 -> L
+
+    [[1, 0], [1, -1], [0, 2], [1, 2]],      // R -> 2
+    [[1, 0], [1, -1], [0, 2], [1, 2]],      // R -> 0
+
+    [[1, 0], [1, 1], [0, -2], [1, -2]],     // 2 -> L
+    [[-1, 0], [-1, 1], [0, -2], [-1, -2]],  // 2 -> R
+
+    [[-1, 0], [-1, -1], [0, 2], [-1, 2]],   // L -> 0
+    [[-1, 0], [-1, -1], [0, 2], [-1, 2]]    // L -> 2
+]
+
+const wall_kick_data_I = [
+    [[-2, 0], [1, 0], [-2, -1], [1, 2]],    // 0 -> R
+    [[-1, 0], [+2, 0], [-1, 2], [2, -1]],   // 0 -> L
+
+    [[-1, 0], [2, 0], [-1, 2], [2, -1]],    // R -> 2
+    [[2, 0], [-1, 0], [+2, +1], [-1, -2]],  // R -> 0
+
+    [[2, 0], [-1, 0], [2, 1], [-1, -2]],    // 2 -> L
+    [[1, 0], [-2, 0], [1, -2], [-2, -2]],   // 2 -> R
+
+    [[1, 0], [-2, -0], [1, -2], [-2, 1]],   // L -> 0
+    [[-2, 0], [1, 0], [-2, -1], [1, 2]]     // L -> 2
+]
+
+
 let level: number = 1
 let score: number = 0
 let gravity: number = 1
@@ -483,7 +513,7 @@ const CELL_SIZE = 5
 const NEXT_CELL_SIZE = 5
 const NEXT_PIECES = 3
 
-let x0 =  80 - MATRIX_WIDTH * CELL_SIZE / 2
+let x0 = 80 - MATRIX_WIDTH * CELL_SIZE / 2
 let y0 = 60 - MATRIX_HEIGHT * CELL_SIZE / 2
 
 let bag = new Bag()
@@ -493,8 +523,8 @@ let matrix = new Matrix(tetrimino)
 // -------- UI --------
 
 let bg = image.create(160, 120)
-bg.fillRect(53, 3, 54, 114, 11)          // Matrix
-bg.fillRect(55, 5, 50, 110, 0)
+bg.fillRect(52, 2, 56, 116, 11)          // Matrix
+bg.fillRect(54, 4, 52, 112, 0)
 scene.setBackgroundImage(bg)
 
 // -------- STATS --------
@@ -539,7 +569,7 @@ function levelUp() {
 
 // -------- CONTROLLER --------
 
-controller.A.onEvent(ControllerButtonEvent.Pressed, function() {
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.rotate(true)
 })
 
@@ -547,7 +577,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.rotate(false)
 })
 
-controller.down.onEvent(ControllerButtonEvent.Repeated, function() {
+controller.down.onEvent(ControllerButtonEvent.Repeated, function () {
     matrix.move(1, 0)
 })
 
