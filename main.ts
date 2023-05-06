@@ -405,17 +405,18 @@ class Tetrimino {
 }
 
 class Bag {
-    preview_1: Sprite[][]
-    preview_2: Sprite[][]
-    preview_3: Sprite[][]
+    private preview: Sprite
+    private contents: number[]
 
-    contents: number[]
-
-    constructor () {
-        this.preview_1 = []
-        this.preview_2 = []
-        this.preview_3 = []
+    constructor() {
+        let full = false
         this.contents = []
+        this.fill()
+        this.preview = sprites.create(image.create(4 * NEXT_CELL_SIZE, 15 * NEXT_CELL_SIZE))
+        this.preview.setPosition(134, 73)
+    }
+
+    private fill() {
         let full = false
         while (!full) {
             let rnd = Math.randomRange(0, 6)
@@ -426,76 +427,104 @@ class Bag {
                 full = true
             }
         }
-        for (let r = 0; r < 4; r ++) {
-            let row_1: Sprite[] = []
-            let row_2: Sprite[] = []
-            let row_3: Sprite[] = []
-            for (let c = 0; c < 4; c ++) {
-                let tmp_sprite = sprites.create(image.create(3, 3))
-                tmp_sprite.setPosition(c * 4 + 119, r * 4 + 17)
-                row_1.push(tmp_sprite)
+    }
 
-                let tmp_sprite_2 = sprites.create(image.create(3, 3))
-                tmp_sprite_2.setPosition(c * 4 + 119, r * 4 + 35)
-                row_2.push(tmp_sprite_2)
-
-                let tmp_sprite_3 = sprites.create(image.create(3, 3))
-                tmp_sprite_3.setPosition(c * 4 + 119, r * 4 + 51)
-                row_3.push(tmp_sprite_3)
+    private updateQueue() {
+        this.preview.image.fill(0)
+        for (let n = 0; n < NEXT_PIECES; n++) {
+            let piece = buildPieceMatrix(this.contents[n], 0)
+            for (let r = 0; r < piece.length; r++) {
+                for (let c = 0; c < piece.length; c++) {
+                    if (piece[r][c] != null) {
+                        this.preview.image.fillRect(c * NEXT_CELL_SIZE, (r + n * 5) * NEXT_CELL_SIZE, NEXT_CELL_SIZE, NEXT_CELL_SIZE, tetris_colors[this.contents[n]])
+                    }
+                }
             }
-            this.preview_1.push(row_1)
-            this.preview_2.push(row_2)
-            this.preview_3.push(row_3)
         }
     }
-    
-    deal (): number {
+
+    deal(): number {
         let next = this.contents.shift()
-        if (this.contents.length < 3) {
-            let full = false
-            while (!full) {
-                let rnd = Math.randomRange(0, 6)
-                if (this.contents.indexOf(rnd) == -1) {
-                    this.contents.push(rnd)
-                }
-                if (this.contents.length == 7) {
-                    full = true
-                }
-            }
+        if (this.contents.length < NEXT_PIECES) {
+            this.fill()
         }
-        let tPreview_1 = new Tetrimino(this.contents[0])
-        let tPreview_2 = new Tetrimino(this.contents[1])
-        let tPreview_3 = new Tetrimino(this.contents[2])
-        for (let r = 0; r < 4; r ++) {
-            for (let c = 0; c < 4; c ++) {
-                if (c < tPreview_1.cells.length && r < tPreview_1.cells.length && tPreview_1.cells[r][c] != null) {
-                    let img = image.create(4, 4)
-                    img.fill(tPreview_1.shapeID + 1)
-                    this.preview_1[r][c].setImage(img)
-                } else {
-                    this.preview_1[r][c].setImage(image.create(4, 4))
-                }
-
-                if (c < tPreview_2.cells.length && r < tPreview_2.cells.length && tPreview_2.cells[r][c] != null) {
-                    let img = image.create(4, 4)
-                    img.fill(tPreview_2.shapeID + 1)
-                    this.preview_2[r][c].setImage(img)
-                } else {
-                    this.preview_2[r][c].setImage(image.create(4, 4))
-                }
-
-                if (c < tPreview_3.cells.length && r < tPreview_3.cells.length && tPreview_3.cells[r][c] != null) {
-                    let img = image.create(4, 4)
-                    img.fill(tPreview_3.shapeID + 1)
-                    this.preview_3[r][c].setImage(img)
-                } else {
-                    this.preview_3[r][c].setImage(image.create(4, 4))
-                }
-            }
-        }
+        this.updateQueue()
         return next
     }
 }
+
+function buildPieceMatrix(shapeID: number, rotation: number): number[][] {
+    let matrix: number[][] = []
+    const shapes = [
+        [[4, 5, 6, 7], [4, 5, 6, 7], [4, 5, 6, 7], [4, 5, 6, 7]],
+        [[0, 3, 4, 5], [0, 3, 4, 5], [0, 3, 4, 5], [0, 3, 4, 5]],
+        [[2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5], [2, 3, 4, 5]],
+        [[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]],
+        [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        [[1, 3, 4, 5], [1, 3, 4, 5], [1, 3, 4, 5], [1, 3, 4, 5]],
+        [[0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5], [0, 1, 4, 5]]
+    ]
+    let max = (shapeID == 0) ? 4 : ((shapeID == 3) ? 2 : 3)
+    let i = 0
+    for (let r = 0; r < max; r++) {
+        matrix.push([])
+        for (let c = 0; c < max; c++) {
+            if (shapes[shapeID][rotation][i] % max == c && Math.floor(shapes[shapeID][rotation][i] / max) == r) {
+                matrix[r].push(shapeID)
+                i++
+            } else {
+                matrix[r].push(null)
+            }
+        }
+    }
+    return matrix
+}
+
+function updateStats() {
+
+    sScore.setText(score.toString())
+    sScore.setPosition(5 + sScore.width / 2, 26 + sScore.height / 2)
+
+    sLevel.setText(level.toString())
+    sLevel.setPosition(5 + sLevel.width / 2, 51 + sLevel.height / 2)
+
+    sLines.setText(lines.toString())
+    sLines.setPosition(5 + sLines.width / 2, 77 + sLines.height / 2)
+
+    sHighscore.setText(highscore.toString())
+    sHighscore.setPosition(5 + sHighscore.width / 2, 101 + sHighscore.height / 2)
+
+}
+
+const tetris_colors = [9, 8, 4, 5, 7, 10, 2]
+
+const wall_kick_data = [
+    [[-1, 0], [-1, 1], [0, -2], [-1, -2]],  // 0 -> R
+    [[1, 0], [1, 1], [0, -2], [1, -2]],     // 0 -> L
+
+    [[1, 0], [1, -1], [0, 2], [1, 2]],      // R -> 2
+    [[1, 0], [1, -1], [0, 2], [1, 2]],      // R -> 0
+
+    [[1, 0], [1, 1], [0, -2], [1, -2]],     // 2 -> L
+    [[-1, 0], [-1, 1], [0, -2], [-1, -2]],  // 2 -> R
+
+    [[-1, 0], [-1, -1], [0, 2], [-1, 2]],   // L -> 0
+    [[-1, 0], [-1, -1], [0, 2], [-1, 2]]    // L -> 2
+]
+
+const wall_kick_data_I = [
+    [[-2, 0], [1, 0], [-2, -1], [1, 2]],    // 0 -> R
+    [[-1, 0], [+2, 0], [-1, 2], [2, -1]],   // 0 -> L
+
+    [[-1, 0], [2, 0], [-1, 2], [2, -1]],    // R -> 2
+    [[2, 0], [-1, 0], [+2, +1], [-1, -2]],  // R -> 0
+
+    [[2, 0], [-1, 0], [2, 1], [-1, -2]],    // 2 -> L
+    [[1, 0], [-2, 0], [1, -2], [-2, -2]],   // 2 -> R
+
+    [[1, 0], [-2, -0], [1, -2], [-2, 1]],   // L -> 0
+    [[-2, 0], [1, 0], [-2, -1], [1, 2]]     // L -> 2
+]
 
 const shapes = [
     [4, 5, 6, 7], 
@@ -517,6 +546,13 @@ const colors: Image[] = [
     assets.image`color6`
 ]
 
+const MATRIX_WIDTH = 10
+const MATRIX_HEIGHT = 22
+const CELL_SIZE = 5
+const NEXT_CELL_SIZE = 5
+const NEXT_PIECES = 3
+const STAT_FONT_SIZE = 5
+
 const X0 = 58
 const Y0 = 8
 
@@ -537,52 +573,40 @@ let bag = new Bag()
 let tetrimino = new Tetrimino(bag.deal())
 let matrix = new Matrix(tetrimino)
 
-// -------- UI --------
+// -------- UI - MATRIX --------
 
 let bg = image.create(160, 128)
-bg.fillRect(53, 13, 54, 104, 15)          // Matrix
-bg.fillRect(55, 15, 50, 100, 0)          // Matrix
-bg.fillRect(116, 14, 18, 54, 0)         // Next
+bg.fillRect(53, 3, 54, 114, 11)          // Matrix
+bg.fillRect(55, 5, 50, 110, 0)
 scene.setBackgroundImage(bg)
 
-// -------- STATS --------
+// -------- UI - STATS --------
 
 let sScoreTitle = sprites.create(assets.image`txt_score`)
 let sLevelTitle = sprites.create(assets.image`txt_level`)
 let sLinesTitle = sprites.create(assets.image`txt_lines`)
 let sHighscoreTitle = sprites.create(assets.image`txt_hiscore`)
+let sNextTitle = sprites.create(assets.image`txt_next`)
 
 sScoreTitle.setPosition(18, 18)
 sLevelTitle.setPosition(18, 43)
 sLinesTitle.setPosition(18, 68)
 sHighscoreTitle.setPosition(23, 93)
+sNextTitle.setPosition(134, 18)
 
-let sScore = textsprite.create("0", 0, 8)
-let sLevel = textsprite.create("0", 0, 8)
-let sLines = textsprite.create("0", 0, 8)
-let sHighscore = textsprite.create("0", 0, 8)
+let sScore = textsprite.create("0", 0, 11)
+sScore.setMaxFontHeight(STAT_FONT_SIZE)
 
-function updateStats() {
+let sLevel = textsprite.create("0", 0, 11)
+sLevel.setMaxFontHeight(STAT_FONT_SIZE)
 
-    sScore.setText(score.toString())
-    sScore.setPosition(5 + sScore.width / 2, 22 + sScore.height / 2)
-    sScore.setMaxFontHeight(8)
+let sLines = textsprite.create("0", 0, 11)
+sLines.setMaxFontHeight(STAT_FONT_SIZE)
 
-    sLevel.setText(level.toString())
-    sLevel.setPosition(5 + sLevel.width / 2, 47 + sLevel.height / 2)
-    sLevel.setMaxFontHeight(8)
+let sHighscore = textsprite.create("0", 0, 11)
+sHighscore.setMaxFontHeight(STAT_FONT_SIZE)
 
-    sLines.setText(lines.toString())
-    sLines.setPosition(5 + sLines.width / 2, 72 + sLines.height / 2)
-    sLines.setMaxFontHeight(8)
-
-    sHighscore.setText(highscore.toString())
-    sHighscore.setPosition(5 + sHighscore.width / 2, 97 + sHighscore.height / 2)
-    sHighscore.setMaxFontHeight(8)
-
-}
-
-// ---- AUTO DROP / GRAVITY ----
+updateStats()
 
 function autoMove() {
     matrix.move(true, 1)
