@@ -615,6 +615,3 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     matrix.hardDrop()
 })
-
-let i = img``
-i.r
