@@ -78,7 +78,7 @@ class Tetrimino {
         return buildPieceMatrix(this.shapeID, rotation)
     }
 
-    update() {
+    update() {ууу
         this.colors = this.build(this.rotation)
         let n = this.colors.length
 
