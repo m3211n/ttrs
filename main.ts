@@ -131,11 +131,14 @@ class Matrix {
         this.s = sprites.create(image.create(this.colors[0].length * CELL_SIZE, this.colors.length * CELL_SIZE))
         this.s.setPosition(80, 60)
         this.s.image.fill(0)
-        this.bottomSonar()
         this.t.update()
+        this.bottomSonar()
     }
 
     bottomSonar() {
+        
+
+/*
         // Bottom sonar
         let lowest_row = this.colors.length
         for (let c = 0; c < this.t.colors.length; c ++) {
@@ -152,7 +155,7 @@ class Matrix {
                 lowest_row = r
             }
         }
-        this.t.bottom = lowest_row - this.t.h
+        this.t.bottom = lowest_row - this.t.h */
     }
 
     redraw() {
